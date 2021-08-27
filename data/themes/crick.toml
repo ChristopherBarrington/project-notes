@@ -1,0 +1,28 @@
+# Theme metadata
+name = "Crick"
+
+# Is theme light or dark?
+light = true
+
+# Primary
+primary = 'blue' #"#4565AE" # links
+
+# Menu
+menu_primary = 'white'
+menu_text = 'black'
+menu_text_active = "#4565AE"
+menu_title = 'black'
+
+# Home sections
+home_section_odd = "white"
+home_section_even = "white"
+
+# Hyperlinks
+
+link = 'grey' #"#4565AE"
+link_hover = 'black' #"#BB90C1"
+
+# Changes for the dark mode
+[dark]
+  link = "#BBDEFB"
+  link_hover = "#BBDEFB"

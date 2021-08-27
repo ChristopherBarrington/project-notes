@@ -2,6 +2,6 @@
 {{/* Input: size (int) */}}
 {{/* Output: resource (obj) */}}
 
-{{ $icon := resources.GetMatch (default "media/icon.png" (path.Join "media" site.Params.site_icon)) }}
+{{ $icon := resources.GetMatch (default "media/icon.png" (path.Join "media" site.Params.favicon)) }}
 {{ $icon_resized := $icon.Fill (printf "%sx%s Center" (string .) (string .)) }}
 {{ return $icon_resized }}

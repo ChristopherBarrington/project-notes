@@ -9,7 +9,7 @@ produces websites to share analysis reports
 [getting started (HUGO)](https://gohugo.io/categories/getting-started)
 [quick start (HUGO)](https://gohugo.io/getting-started/quick-start)
 [managing blogdown (a basis for this repo/workflow)](https://drmowinckels.io/blog/2020-05-25-changing-you-blogdown-workflow)
-[HUGO shortcode](https://gohugo.io/content-management/shortcodes/)
+[HUGO shortcode](https://gohugo.io/content-management/shortcodes)
 
 ## clone the repository
 

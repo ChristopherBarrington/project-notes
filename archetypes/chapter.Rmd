@@ -1,0 +1,25 @@
+---
+title: {{ default (.File.Path | path.Dir | path.Base | replaceRE "^20\\d+-\\d+-\\d+-" "" | humanize | title) (getenv "TITLE") }}
+summary: 
+weight: 1
+
+categories:
+
+tags:
+
+authors:
+  - christopher-barrington
+
+type: book
+toc: true
+draft: false
+
+date: `r format(Sys.time(), "%Y-%m-%d")`
+created: {{ now.Format "2006-01-02" }}
+
+always_allow_html: true
+output:
+  html_document:
+    keep_md: yes
+    df_print: paged
+---

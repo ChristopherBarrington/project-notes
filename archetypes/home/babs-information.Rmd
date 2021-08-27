@@ -1,0 +1,46 @@
+---
+# An instance of the Hero widget.
+# Documentation: https://wowchemy.com/docs/page-builder/
+widget: blank
+
+# Activate this widget? true/false
+active: true
+
+# This file represents a page section.
+headless: true
+
+# Order that this section appears on the page.
+weight: 51
+
+title: BABS project information
+subtitle: Taken from the project's `.babs` file
+
+hero_media:
+
+design:
+  columns: '2'
+  spacing:
+    padding: ["20px", "0px", "0px", "0px"]
+---
+
+```{r setup, echo=FALSE, cache=FALSE, results='asis', warning=FALSE, message=FALSE}
+options(warn=-1)
+
+library(knitr)
+library(yaml)
+library(datarepository)
+library(tidyverse)
+
+system.file('docs/babs.yaml', package='datarepository') %>%
+  read_lines() %>%
+  str_replace_all(pattern='\\{.+\\}', replacement='unspecified') %>%
+  read_yaml(text=.) %>%
+  pluck(1) %>%
+  map_at('Path', basename) %>%
+  map_at('Scientist', str_remove, pattern='@crick.ac.uk') %>%
+  as.data.frame() %>%
+  select(Lims, Scientist, Lab, Code, Estimate, Bioinformatician, Path, Project, Hash) %>%
+  unlist() %>%
+  enframe('', '') %>%
+  kable(format='markdown')
+```

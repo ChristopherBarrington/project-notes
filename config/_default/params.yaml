@@ -9,6 +9,8 @@ theme: crick
 day_night: true
 font: ubuntu
 font_size: m
+site_icon: icons/CRICK_favicon.png
+# site_logo: logos/CRICK_Brandmark_01_CMYK.svg
 
 # search engine optimisation
 

@@ -18,7 +18,7 @@ subtitle:
 design:
   columns: "1"
   background:
-    image: crick-building/home.img
+    image: crick-building/C0132968_0.jpg
     image_parallax: true
     image_darken: 1 # Darken the image? Range 0-1 where 0 is transparent and 1 is opaque.
     image_position: center # options include `left`, `center` (default), or `right`.

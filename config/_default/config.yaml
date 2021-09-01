@@ -3,7 +3,7 @@
 # Hugo Documentation: https://gohugo.io/getting-started/configuration/#all-configuration-settings
 # This file is formatted using YAML syntax - learn more at https://learnxinyminutes.com/docs/yaml/
 
-title: 'Project title' # Website name
+title: 'BABS project report' # Website name
 baseurl: '' # Website URL
 copyright: '' # Footer text, e.g. '© {year} Me'
 
@@ -40,12 +40,13 @@ ignoreFiles:
   - .Rmd$
   - .Rmarkdown$
   - .Rprofile$
-  - .Rproj$
   - .Rproj.user
-  - knitr-cache
+  - .Rproj$
+  - ^cache$
   - renv
   - renv.lock
   - scratch
+
 permalinks:
   docs: '/:year/:month/:day/:slug/'
   books: '/:year/:month/:day/:slug/'

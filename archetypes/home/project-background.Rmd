@@ -97,9 +97,9 @@ proposal_docx %>%
 ```
 
 ```{r add_project_proposal_link, echo=FALSE}
-cat('{{< callout note >}}\n')
+cat('{{< callout automated >}}\n')
 system.file('docs/proposal.docx', package='datarepository') %>%
-  when(.!=''~sprintf(fmt='The above text was auto-generated from the submitted [project proposal](%s). 🤖\n', .),
+  when(.!=''~sprintf(fmt='The above text was auto-generated from the [submitted project proposal](%s).\n', .),
        TRUE~'The project proposal could not be read from the data-repository. Expected to find a proposal.docx file\n') %>%
   cat()
 cat('{{< /callout >}}\n')

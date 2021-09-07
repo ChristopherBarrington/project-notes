@@ -13,7 +13,7 @@ headless: true
 weight: 51
 
 title: BABS project information
-subtitle: Taken from the project's `.babs` file
+subtitle:
 
 hero_media:
 
@@ -45,6 +45,6 @@ system.file('docs/babs.yaml', package='datarepository') %>%
   kable(format='markdown')
 
 cat('\n{{< callout automated >}}\n')
-cat('This section was auto-generated.\n')
+cat('This section was auto-generated from the `.babs` file.\n')
 cat('{{< /callout >}}\n')
 ```

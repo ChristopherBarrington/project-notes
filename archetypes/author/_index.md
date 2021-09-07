@@ -17,7 +17,7 @@ organizations:
 social:
   - label: Send an email
     icon: envelope
-    icon_pack: fas
+    icon_pack: far
     link: mailto:{{ .File.Path | path.Dir | path.Base | replaceRE "-" "." }}@crick.ac.uk?subject={{ getenv "LIMSID" }}
     display:
       header: true

@@ -22,6 +22,13 @@ social:
     display:
       header: true
       footer: true
+  - label: GitHub
+    icon: github-alt
+    icon_pack: fab
+    link: https://github.com/CrickBABS
+    display:
+      header: true
+      footer: false
   - label: ORCID
     icon: orcid
     icon_pack: ai

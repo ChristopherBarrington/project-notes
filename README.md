@@ -19,7 +19,7 @@ produces websites to share analysis reports
 ## clone the repository
 
 ```bash
-git clone
+git clone && mkdir content
 ```
 
 ### make an author
@@ -48,6 +48,14 @@ hugo new --kind chapter new-book/new-chapter/index.Rmd
 
 hugo new --kind docs new-docs
 hugo new --kind doc new-docs/new-doc/index.Rmd
+```
+
+## callouts
+
+```go
+{{< callout [info,warning,notice,question,result,automated] >}}
+Text in the callout.
+{{< /callout >}}
 ```
 
 ## render the website

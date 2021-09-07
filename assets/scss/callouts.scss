@@ -1,0 +1,57 @@
+
+/* callout with a robot glyph */
+/* robot glyph, grey colours */
+div.alert-automated > div:first-child::before {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #696969;
+  content: '\f544';
+}
+
+.alert-automated {
+  color: #696969;
+  background-color: #EEEEEE;
+  border-color: #696969;
+}
+
+/* callout for asking question */
+/* question mark in a circle glpyh, blue colours same as `note` */
+div.alert-question > div:first-child::before {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: '\f059';
+}
+
+.alert-question {
+  color: #12537E;
+  background-color: #F6FBFE;
+  border-color: #1976D2;
+}
+
+/* callout for interpretation */
+/* microscope glyph, purple colours */
+div.alert-result > div:first-child::before {
+  font-family: 'Font Awesome 5 Free';
+  color: #794880;
+  content: '\f610';
+}
+
+.alert-result {
+  color: #794880;
+  background-color: #f9f5f9;
+  border-color: #ac77b3;
+}
+
+/* callout for notice */
+/* exclamation glyph, orange colours */
+div.alert-notice > div:first-child::before {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #d88c00;
+  content: '\f12a'
+}
+
+.alert-notice {
+  color: #d88c00;
+  background-color: #fff8eb;
+  border-color: #ffba3b;}

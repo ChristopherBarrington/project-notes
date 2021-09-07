@@ -39,7 +39,7 @@ system.file('docs/babs.yaml', package='datarepository') %>%
   map_at('Path', basename) %>%
   map_at('Scientist', str_remove, pattern='@crick.ac.uk') %>%
   as.data.frame() %>%
-  select(Lims, Scientist, Lab, Code, Estimate, Bioinformatician, Path, Project, Hash) %>%
+  select(`LIMS ID`=Lims, Scientist, Lab, `Cost code`=Code, `Time estimate`=Estimate, Bioinformatician, `Directory`=Path, Project, `BABS hash`=Hash) %>%
   unlist() %>%
   enframe('', '') %>%
   kable(format='markdown')

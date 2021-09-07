@@ -58,6 +58,12 @@ Text in the callout.
 {{< /callout >}}
 ```
 
+## in-text icons
+
+```go
+{{< icon name="file-word" pack="fas" >}}
+```
+
 ## render the website
 
 ```bash

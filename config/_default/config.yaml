@@ -35,25 +35,23 @@ paginate: 10
 enableEmoji: true
 enableRobotsTXT: true
 footnotereturnlinkcontents: <sup>^</sup>
+disableAliases: true
+timeout: 600000
+sectionPagesMenu: "main" # auto list in `main` navbar
+
 ignoreFiles: 
   - .R$
   - .Rmd$
   - .Rmarkdown$
   - .Rprofile$
-  - .Rproj.user
+  - .Rproj.user$
   - .Rproj$
-  - ^cache$
+  - knitr_cache
   - renv
   - renv.lock
   - scratch
 
-permalinks:
-  docs: '/:year/:month/:day/:slug/'
-  books: '/:year/:month/:day/:slug/'
-disableAliases: true
-outputs:
-  home: [HTML, RSS, JSON, WebAppManifest, headers, redirects]
-  section: [HTML, RSS]
+# https://gohugo.io/getting-started/configuration-markup/
 markup:
   defaultMarkdownHandler: goldmark
   goldmark:
@@ -64,15 +62,25 @@ markup:
   tableOfContents:
     startLevel: 2
     endLevel: 5
+
+permalinks:
+  docs: '/:year/:month/:day/:slug/'
+  books: '/:year/:month/:day/:slug/'
+
+outputs:
+  home: [HTML, RSS, JSON, WebAppManifest, headers, redirects]
+  section: [HTML, RSS]
+
 imaging:
   resampleFilter: lanczos
   quality: 75
   anchor: smart
-timeout: 600000
+
 taxonomies:
   tag: tags
   category: categories
   author: authors
+
 related:
   threshold: 80
   includeNewer: true
@@ -82,4 +90,3 @@ related:
       weight: 100
     - name: categories
       weight: 70
-sectionPagesMenu: "main" # auto list in `main` navbar

@@ -22,6 +22,15 @@ produces websites to share analysis reports
 git clone && mkdir content
 ```
 
+## conda setup
+
+```bash
+conda create # etc
+# copy hugo binary
+conda install python=3.9.7
+pip3 install academic
+```
+
 ### make an author
 
 ```bash

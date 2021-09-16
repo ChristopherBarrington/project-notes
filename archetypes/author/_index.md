@@ -18,14 +18,14 @@ social:
   - label: Send an email
     icon: envelope
     icon_pack: far
-    link: mailto:{{ .File.Path | path.Dir | path.Base | replaceRE "-" "." }}@crick.ac.uk?subject={{ getenv "LIMSID" }}
+    link: mailto:{{ .File.Path | path.Dir | path.Base | replaceRE "-" "." }}@crick.ac.uk?subject={{ getenv "LIMSID" | default "" }}
     display:
       header: true
       footer: true
   - label: GitHub
     icon: github-alt
     icon_pack: fab
-    link: https://github.com/CrickBABS
+    link: https://github.com/{{ getenv "GITHUB" | default "CrickBABS" }}
     display:
       header: true
       footer: false

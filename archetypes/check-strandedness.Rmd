@@ -26,35 +26,35 @@ output:
 <!-- initial set up chunks are invisible -->
 
 <!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd, cache=FALSE, echo=FALSE, code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
 ```
 
 <!-- read the standard knitr setup script -->
-```{r knitr_setup, cache=FALSE, echo=FALSE, message=FALSE, warning=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```{r knitr_setup, opts.label='batch_chunk', code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
 ```
 
 <!-- load any packages for the workbook -->
-```{r load_workbook_packages, cache=FALSE, echo=FALSE}
+```{r load_workbook_packages, opts.label='batch_chunk'}
 library(yaml)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
-```{r configure_r, cache=FALSE, echo=FALSE, code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
+```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
 ```
 
-<!-- DOIs for software used in the workbook or to generate presented results, a named list of strings -->
+<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
 c(RSeQC='10.1093/bioinformatics/bts356',
   STAR='10.1093/bioinformatics/bts635') -> academic_doi
 c() -> software_doi
 ```
 
-<!-- write a bibliography (test) -->
+<!-- write a bibliography -->
 ```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
 ```
 
 <!-- set a ggplot theme to use as a base in the workbook -->
-```{r define_global_ggplot_theme, cache=FALSE, echo=FALSE}
+```{r define_global_ggplot_theme, opts.label='batch_chunk'}
 (theme_bw() +
  theme(text=element_text(size=10, colour='black'),
        panel.grid.minor=element_blank(),
@@ -63,17 +63,17 @@ theme_set()
 ```
 
 <!-- any final things to set for this workbook -->
-```{r final_setup, cache=FALSE, echo=FALSE}
+```{r final_setup, opts.label='batch_chunk'}
 opts_chunk$set(cache=FALSE)
 result_exists <- file.exists('files/infer_experiment.result.txt')
 ```
 
 <!-- define slugs for other reports here for ease and reuse -->
-```{r define_slugs, cache=FALSE, echo=FALSE}
+```{r define_slugs, opts.label='batch_chunk'}
 slugs <- list()
 ```
 
-<!-- hyperlinks: [Crick website][CRICK] -->
+<!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 [STAR]: https://academic.oup.com/bioinformatics/article/29/1/15/272537
 [RSEQC]: https://academic.oup.com/bioinformatics/article/28/16/2184/325191
@@ -269,17 +269,17 @@ results %>%
 
 <!-- include a references section -->
 
-```{r show_list_references, cache=FALSE, child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
 ```
 
 <!-- include a session information section -->
 
-```{r record_saved_objects, cache=FALSE, echo=FALSE}
+```{r record_saved_objects, opts.label='batch_chunk'}
 #! names of object to be included in the table of hashes
 saved_objects <- c()
 ```
 
-```{r show_session_information, cache=FALSE, child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
+```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
 ```
 
 <!-- end of session information -->

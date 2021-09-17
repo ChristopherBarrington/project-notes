@@ -94,6 +94,11 @@ Anything here is included in the summary.
 
 
 
+<!-- include a references section -->
+
+```{r show_list_references, cache=FALSE, child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+```
+
 <!-- include a session information section -->
 
 ```{r record_saved_objects, cache=FALSE, echo=FALSE}

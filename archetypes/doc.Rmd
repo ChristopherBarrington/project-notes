@@ -35,7 +35,6 @@ output:
 
 <!-- load any packages for the workbook -->
 ```{r load_workbook_packages, opts.label='batch_chunk'}
-library(yaml)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
@@ -63,8 +62,6 @@ theme_set()
 
 <!-- any final things to set for this workbook -->
 ```{r final_setup, opts.label='batch_chunk'}
-opts_chunk$set(cache=FALSE)
-result_exists <- file.exists('files/infer_experiment.result.txt')
 ```
 
 <!-- define slugs for other reports here for ease and reuse -->

@@ -1,0 +1,272 @@
+---
+title: Quantify gene expression with nf-core/rnaseq
+weight: 2
+
+categories:
+
+tags:
+
+authors:
+  - christopher-barrington
+
+type: docs
+toc: true
+draft: false
+
+date: `r format(Sys.time(), "%Y-%m-%d")`
+created: {{ now.Format "2006-01-02" }}
+
+always_allow_html: true
+output:
+  html_document:
+    keep_md: yes
+    df_print: paged
+---
+
+<!-- initial set up chunks are invisible -->
+
+<!-- read the standard knitr setup script -->
+```{r knitr_setup, echo=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```
+
+<!-- make subdirectories to write into/any bash work -->
+```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```
+
+<!-- load any packages for the workbook -->
+```{r load_workbook_packages, opts.label='batch_chunk'}
+library(biomaRt)
+```
+
+<!-- read the standard setup script, loading well-used libraries -->
+```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
+```
+
+<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
+c(RSEM='10.1186%2F1471-2105-12-323',
+  STAR='10.1093/bioinformatics/bts635',
+  nfcore='10.1038/s41587-020-0439-x') -> academic_doi
+c(nextflow='10.1038/nbt.3820') -> software_doi
+```
+
+<!-- write a bibliography -->
+```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```
+
+<!-- set a ggplot theme to use as a base in the workbook -->
+```{r define_global_ggplot_theme, opts.label='batch_chunk'}
+(theme_bw() +
+ theme(text=element_text(size=10, colour='black'),
+       panel.grid.minor=element_blank(),
+       strip.background=element_blank())) %>%
+theme_set()
+```
+
+<!-- any final things to set for this workbook -->
+```{r final_setup, opts.label='batch_chunk'}
+data(genome)
+
+file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'pipeline_info', 'software_versions.tsv') %>%
+  read.delim(header=FALSE) %>%
+  deframe() -> software_versions
+```
+
+<!-- define slugs for other reports here for ease and reuse -->
+```{r define_slugs, opts.label='batch_chunk'}
+slugs <- list()
+```
+
+<!-- define shortcut links -->
+[CRICK]: https://www.crick.ac.uk
+[NFCORE RNASEQ]: https://nf-co.re/rnaseq
+[RSEM]: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-323
+[STAR]: https://academic.oup.com/bioinformatics/article/29/1/15/272537
+
+<!-- end of initial set up chunks -->
+
+Here I will detail running the [nf-core/rnaseq (version `r software_versions['nf-core/rnaseq']`)][NFCORE RNASEQ] pipeline. The pipeline takes FastQ files as input, runs quality control checks on the data, trimming reads for low quality nucleotides, alignment of reads and quantification of aligned data. The pipeline provides BAM format maps and expression matrices. 
+
+<!--more-->
+
+## Configuration
+
+The pipeline was configured to use the `r genome$species` `r genome$version` and Ensembl gene models `r genome$release`. The `--aligner star_rsem` option was specified to align the reads with [`STAR`][STAR] and quantify expression with [`RSEM`][RSEM] version `r software_versions['rsem']`.
+
+A full list of [software versions](files/software_versions.tsv) is output by the pipeline.
+
+<!--  -->
+
+## MultiQC report
+
+The MultiQC report provided [here](files/multiqc_report.html) provides quality control information on the results of the pipeline. The complete report contains multiple tools that effectively describe the same feature of the data, some of these are highlighted below.
+
+* [__General Statistics__](files/multiqc_report.html#general_stats) table is a summary of the alignment and classification of reads in each library.
+* [__RSEM DESeq2 sample similarity__](files/multiqc_report.html#star_rsem_deseq2_clustering) show how similar each library is to one-another. The gene count data are normalised and distances between libraries calculated.
+* [__RSEM DESeq2 PCA plot__](files/multiqc_report.html#rsem_deseq2_pca) represents the gene expression matrices of the libraries.
+* [__Biotype Counts__](files/multiqc_report.html#biotype_counts) shows the genomic context of alignments.
+* [__QualiMap__](files/multiqc_report.html#qualimap) further categorises alignments in genes.
+* [__Gene Coverage Profile__](files/multiqc_report.html#qualimap-genome-fraction-coverage) shows the alignments across a metagene.
+
+FastQC (version `r software_versions['fastqc']`) is run for each library and the results are summarised in the MultiQC report. Just in case, the FastQC reports are available [here](files/fastqc.tar).
+
+<!-- copying files etc, no need to print the code -->
+
+```{r copy_mutliqc_report, echo=FALSE}
+file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'multiqc', 'star_rsem') %>%
+  sprintf(fmt='cp %s/multiqc_report.html files/multiqc_report.html') %>%
+  system(ignore.stdout=TRUE, ignore.stderr=TRUE)
+```
+
+```{r tar_fastqc, echo=FALSE}
+file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'fastqc') %>%
+  sprintf(fmt='mkdir -p scratch/fastqc && ln -sf %s/*html scratch/fastqc/ && tar --directory scratch --dereference --create --file files/fastqc.tar fastqc') %>%
+  system(ignore.stdout=TRUE, ignore.stderr=TRUE)
+```
+
+```{r copy_pipeline_info, echo=FALSE}
+c('pipeline_report.txt', 'software_versions.tsv') %>%
+  file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'pipeline_info', .) %>%
+  subset(file.exists(.)) %>%
+  sprintf(fmt='cp %s files/%s', basename(.)) %>%
+  plyr::l_ply(system, ignore.stdout=TRUE, ignore.stderr=TRUE)
+```
+
+<!--  -->
+
+```{r load_data_for_replotting, echo=FALSE}
+data(mart)
+data(project_sample_sheet)
+
+project_sample_sheet %>%
+  mutate(rn=Sample.limsid) %>%
+  column_to_rownames('rn') -> project_sample_sheet
+
+file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'star_rsem', 'rsem.merged.gene_tpm.tsv') %>%
+  read_tsv() %>%
+  select(-`transcript_id(s)`) %>%
+  rename(ensembl_gene_id=gene_id) %>%
+  gather(key=Sample.limsid, value='tpm', -ensembl_gene_id) -> data
+```
+
+<!-- include project-specific information -->
+
+## Number of detected genes
+
+The number of genes with non-zero expression is plotted below.
+
+```{r plot_detected_genes, dependson='load_data_for_replotting'}
+data(project_sample_sheet)
+min_expression <- 0
+
+data %>%
+  filter(is_greater_than(e2=tpm, e1=min_expression)) %>%
+  group_by(Sample.limsid) %>%
+  tally() %>%
+  left_join(y=project_sample_sheet, by='Sample.limsid') -> plot_data
+
+plot_data %>% {
+    ggplot(data=.) +
+    aes(x=donor_id:treatment, y=n) +
+    labs(x='Sample', y='Detected genes') +
+    geom_bar(stat='identity') +
+    scale_x_discrete() +
+    scale_y_continuous(labels=comma) +
+    theme(axis.text.x=element_text(angle=30, hjust=1, vjust=1),
+          axis.title.x=element_blank())} %>%
+  resize_and_show(width=nrow(project_sample_sheet)/2.5, aspect=3)
+```
+
+```{r show_detected_genes, echo=FALSE, dependson='plot_detected_genes'}
+data(project_sample_sheet)
+
+plot_data %>%
+  relocate(n, .after=last_col()) %>%
+  mutate_at('n', comma) %>%
+  kable(format=ifelse(interactive(), 'markdown', 'html'),
+        align=c(rep('l', ncol(project_sample_sheet)), 'r'))
+```
+
+<!--  -->
+
+## Duplication rate
+
+[Picard][PICARD] is used to mark duplicate reads in the BAM file. The reads are not removed, just marked with a SAM flag:
+
+* `0` forward alignment
+* `4` unmapped
+* `16` reverse alignment
+* `256` not primary alignment, forward
+* `272` not primary alignment, reverse
+* `1024` PCR or optical duplicate, forward alignment
+* `1040` PCR or optical duplicate, reverse alignment
+
+(Multiply-aligned PCR duplicates are not marked as such under this scheme).
+
+```{r load_picard_metrics}
+file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'star_rsem', 'picard_metrics') %>%
+  list.files(pattern='*.txt$', full.names=TRUE) %>%
+  set_names() %>%
+  set_names(basename) %>%
+  set_names(str_remove, pattern='\\..*') %>%
+  ldply(.id='Sample.limsid', read_tsv, comment='#') %>%
+  select(-LIBRARY, -ESTIMATED_LIBRARY_SIZE) -> metrics
+
+metrics %<>%
+  mutate(`Input reads`=UNPAIRED_READS_EXAMINED+UNMAPPED_READS,
+         `BAM records`=UNPAIRED_READS_EXAMINED+UNMAPPED_READS+SECONDARY_OR_SUPPLEMENTARY_RDS) %>%
+  select(Sample.limsid,
+         `BAM records`,
+         `Input reads`,
+         `Duplicated reads`=UNPAIRED_READ_DUPLICATES,
+         Alignments=UNPAIRED_READS_EXAMINED,
+         `Unmapped reads`=UNMAPPED_READS,
+         `Secondary alignments`=SECONDARY_OR_SUPPLEMENTARY_RDS)
+```
+
+The Picard metrics show:
+
+* "Input reads" are adapter-trimmed reads (`0`+`4`+`16`+`1024`+`1040`)
+* "BAM records" is the number of entries in the BAM file (`0`+`4`+`16`+`256`+`272`+`1024`+`1040`)
+* "Alignments" are the primary alignments (`0`+`16`+`1024`+`1040`)
+* "Unmapped reads" have no alignment (`4`)
+* "Secondary alignments" are other possible alignments (`256`+`272`)
+* "Duplicated reads" are the PCR or optical duplicates (`1024`+`1040`)
+
+```{r show_picard_results, echo=FALSE, dependson='load_picard_metrics'}
+data(project_sample_sheet)
+
+metrics %>%
+  mutate_if(is.numeric, comma) %>%
+  left_join(x=project_sample_sheet, by='Sample.limsid') %>%
+  kable(format=ifelse(interactive(), 'markdown', 'html'),
+        align=c(rep('l', ncol(project_sample_sheet)), 'r'))
+```
+
+{{< callout "warning" >}}
+This needs to be adapted for paired-end datasets!
+{{< /callout >}}
+
+<!--  -->
+
+## Methods section
+
+> Gene expression was quantified from raw FastQ files in the `r genome$version` genome with Ensembl release-`r genome$release` gene models using the nf-core/rnaseq pipeline (version `r software_versions['nf-core/rnaseq']`). Reads were trimmed for adapters with trimgalore (version `r software_versions['trimgalore']`) and aligned and quantified with RSEM/STAR (version `r software_versions['rsem']`). Data quality was inspected using FastQC (version `r software_versions['fastqc']`), Picard (version `r software_versions['picard']`) and RSeQC (version `r software_versions['rseqc']`).
+
+<!-- include a references section -->
+
+```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+```
+
+<!-- include a session information section -->
+
+```{r record_saved_objects, opts.label='batch_chunk'}
+#! names of object to be included in the table of hashes
+saved_objects <- c()
+```
+
+```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
+```
+
+<!-- end of session information -->
+

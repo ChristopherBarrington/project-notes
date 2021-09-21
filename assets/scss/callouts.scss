@@ -56,3 +56,21 @@ div.alert-notice > div:first-child::before {
   color: #d88c00;
   background-color: #fff8eb;
   border-color: #ffba3b;}
+
+/* notice callout for attracting attention but not warning */
+/* tick glyph, green colours */
+div.alert-tick > div:first-child::before {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #269b26;
+  content: '\f058'
+}
+
+.alert-tick {
+  color: #269b26;
+  background-color: #ddf7dd;
+  border-color: #31ca31;}
+
+
+
+

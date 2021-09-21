@@ -93,7 +93,7 @@ system.file('docs/genome.yaml', package='datarepository') %>%
   read_yaml() -> genome
 ```
 
-```{r show_genome}
+```{r show_genome, echo=FALSE}
 genome %>%
   enframe(name='', value='') %>%
   kableExtra::kable(format=if_else(interactive(), 'markdown', 'html'))

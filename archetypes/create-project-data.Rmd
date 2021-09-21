@@ -1,0 +1,236 @@
+---
+title: Create Project Data
+weight: 1
+
+categories:
+
+tags:
+
+authors:
+  - christopher-barrington
+
+type: docs
+toc: true
+draft: false
+
+date: `r format(Sys.time(), "%Y-%m-%d")`
+created: {{ now.Format "2006-01-02" }}
+
+always_allow_html: true
+output:
+  html_document:
+    keep_md: yes
+    df_print: paged
+---
+
+<!-- initial set up chunks are invisible -->
+
+<!-- read the standard knitr setup script -->
+```{r knitr_setup, echo=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```
+
+<!-- make subdirectories to write into/any bash work -->
+```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```
+
+<!-- load any packages for the workbook -->
+```{r load_workbook_packages, opts.label='batch_chunk'}
+library(urltools)
+library(yaml)
+```
+
+<!-- read the standard setup script, loading well-used libraries -->
+```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
+```
+
+<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
+c() -> academic_doi
+c() -> software_doi
+```
+
+<!-- write a bibliography -->
+```{r write_bibliography, dependson='add_doi_to_bibliography', eval={length(academic_doi)+length(software_doi)}>0, cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```
+
+<!-- set a ggplot theme to use as a base in the workbook -->
+```{r define_global_ggplot_theme, opts.label='batch_chunk'}
+(theme_bw() +
+ theme(text=element_text(size=10, colour='black'),
+       panel.grid.minor=element_blank(),
+       strip.background=element_blank())) %>%
+theme_set()
+```
+
+<!-- any final things to set for this workbook -->
+```{r final_setup, opts.label='batch_chunk'}
+opts_chunk$set(cache=FALSE)
+```
+
+<!-- define slugs for other reports here for ease and reuse -->
+```{r define_slugs, opts.label='batch_chunk'}
+slugs <- list()
+```
+
+<!-- define shortcut links -->
+[CRICK]: https://www.crick.ac.uk
+
+<!-- end of initial set up chunks -->
+
+All data defining this project are gathered in this post. We create `R` objects that can use used throughout via the `datarepository` package. Objects to describe the project samples, a biomaRt connection will be created for example.
+
+<!--more-->
+
+## Link to the raw sequencing files
+
+The FastQ files for whole projects are collected in the ASF outputs/BABS inputs directory. A link is made here between the ASF directory and the data-repository.
+
+```{r link_to_primary_data}
+project <- read_dotbabs()
+
+lab <- project$Lab
+scientist <- project$Scientist
+lims <- project$Lims
+
+primary_data_path <- file.path('/camp/stp/babs/inputs/sequencing/data', lab, scientist, lims, 'primary_data')
+link_path <- file.path(data_repository_path(), 'primary_data')
+
+if(!dir.exists(primary_data_path))
+  knit_exit('primary_data not found! Check path (eg Scientist attribute)')
+
+if(!file.exists(link_path))
+  sprintf(fmt='ln --symbolic %s %s', primary_data_path, link_path) %>%
+    system()
+``` 
+
+<!--  -->
+
+## Save the genome information
+
+The genome is defined here, using the YAML file (though it could be defined any other way).
+
+```{r define_genome}
+list(species='homo_sapiens', version='GRCh38',
+     source='ensembl', release='95') -> genome_defaults
+
+species_to_organism <- function(x='a_species')
+  when(x=='a_species'~'anorganism',
+       TRUE~str_replace(x, '^(.)(.*_)(.*)$', '\\1\\3'))
+
+system.file('docs/genome.yaml', package='datarepository') %>%
+  when(file.exists(.)~read_yaml(.),
+       TRUE~genome_defaults) %>%
+  modify_at('release', as.character) %>%
+  list_modify(organism=species_to_organism(x=.$species)) %>%
+  modifyList(x=genome_defaults) -> genome
+
+save(genome)
+```
+
+```{r show_genome, dependson='define_genome', echo=FALSE}
+genome %>%
+  as.data.frame() %>%
+  kable(format=if_else(interactive(), 'markdown', 'html'))
+```
+
+<!--  -->
+
+## Create a BioMart connection
+
+Here, a connection to the Ensembl archive is created and saved to the `projectData`.
+
+```{r connect_to_biomart}
+data(genome)
+
+mart <- helpr::get_mart(species=genome$organism, release=genome$release, dataset='gene_ensembl')
+
+save(mart)
+```
+
+The `mart` object connects to ``r mart@host %>% domain()``.
+
+<!--  -->
+
+## Read and parse metadata
+
+In this section, a project sample sheet is created. This may include information from the [ASF sample sheet](files/asf.xlsx), the [project sample table](files/experimental_table.xlsx) agreed at the design meetings and any other sample information.
+
+First, the ASF sample sheet is read. It contains a lot of information about the library preparation and may only be required for troubleshooting.
+
+```{r read_asf_metadata}
+system.file('sample_sheets/asf.xlsx', package='datarepository') %>%
+  read.xlsx(startRow=2) %>%
+  arrange({mixedorder(Sample.limsid) %>% order()}) -> asf_metadata
+```
+
+Now the agreed experimental table is read, and any other sample information should be read too.
+
+```{r read_project_samples}
+system.file('sample_sheets/experimental_table.xlsx', package='datarepository') %>%
+  read.xlsx() %>%
+  when(is.element('Sample.limsid', colnames(.))~.,
+       TRUE~knit_exit('No LIMS ID in experimental_table!')) %>%
+  arrange({mixedorder(Sample.limsid) %>% order()}) -> experimental_table
+```
+
+{{< callout notice >}}
+Please provide additional sample metadata, such as unforeseen batch effects so they can be included here. (There's an email link in the navigation bar.)
+{{< /callout >}}
+
+All of the sample information is now brought together, using the `Sample.limsid` as the index. The `complete_sample_sheet` object contains all information on the samples from the above tables, whereas the `project_sample_sheet` is a subset of those variables that are likely most useful.
+
+Any project-specific additions/modifications to the metadata are made in the following code chunk. The agreed project sample descriptions are read and saved in the following chunk. Any modification to make the data R-compliant are made here.
+
+```{r collate_metadata}
+#! any project-specific modifications should be made here
+
+#! list of variables to convert to factors and the levels that they should have
+list() -> factor_levels
+
+#! define the complete set of metadata for the project
+list(experimental_table,
+     asf_metadata) %>%
+  Reduce(f=function(x,y) left_join(x=x, y=y, by='Sample.limsid')) %>%
+  mutate(donor_id=str_remove(Sample.Name, '_.*$')) -> complete_sample_sheet
+
+#! convert the variables to factors as required
+complete_sample_sheet[names(factor_levels)] %<>%
+  Map(data=., variable=names(.), function(data, variable)
+    factor(x=data, levels=factor_levels[[variable]]))
+
+#! subset the complete sample sheet
+complete_sample_sheet %>%
+  select(Sample.limsid) -> project_sample_sheet
+
+#! save the objects to the data-repository
+save(complete_sample_sheet, project_sample_sheet)
+```
+
+{{< callout result >}}
+The `complete_sample_sheet` contains the LIMS identifier and all sample metadata that is available. The `project_sample_sheet` is a subset of `complete_sample_sheet`
+{{< /callout >}}
+
+The first `r pmin(10, nrow(project_sample_sheet))` rows of the `project_sample_sheet` are shown below:
+
+```{r show_project_sample_sheet, echo=FALSE}
+head(project_sample_sheet, n=10) %>%
+  kable(format=if_else(interactive(), 'markdown', 'html'))
+```
+
+<!-- include a references section -->
+
+```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+```
+
+<!-- include a session information section -->
+
+```{r record_saved_objects, opts.label='batch_chunk'}
+#! names of object to be included in the table of hashes
+saved_objects <- c('genome', 'mart', 'complete_sample_sheet', 'project_sample_sheet')
+```
+
+```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
+```
+
+<!-- end of session information -->
+

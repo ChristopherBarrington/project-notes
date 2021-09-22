@@ -47,6 +47,7 @@ ignoreFiles:
   - .Rprofile$
   - .Rproj.user$
   - .Rproj$
+  - _rslurm_*
   - knitr_cache
   - renv
   - renv.lock

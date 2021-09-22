@@ -182,9 +182,8 @@ data(project_sample_sheet)
 
 plot_data %>%
   relocate(n, .after=last_col()) %>%
-  mutate_at('n', comma) %>%
-  kable(format=ifelse(interactive(), 'markdown', 'html'),
-        align=c(rep('l', ncol(project_sample_sheet)), 'r'))
+  kable(format=if_else(interactive(), 'markdown', 'html'),
+        format.args=list(big.mark=','))
 ```
 
 <!--  -->
@@ -237,10 +236,9 @@ The Picard metrics show:
 data(project_sample_sheet)
 
 metrics %>%
-  mutate_if(is.numeric, comma) %>%
   left_join(x=project_sample_sheet, by='Sample.limsid') %>%
-  kable(format=ifelse(interactive(), 'markdown', 'html'),
-        align=c(rep('l', ncol(project_sample_sheet)), 'r'))
+  kable(format=if_else(interactive(), 'markdown', 'html'),
+        format.args=list(big.mark=','))
 ```
 
 {{< callout "warning" >}}

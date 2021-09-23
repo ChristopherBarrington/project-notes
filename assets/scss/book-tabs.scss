@@ -8,8 +8,6 @@ input.toggle {
   position: absolute;
 }
 
-
-
 /* https://github.com/alex-shpak/hugo-book/blob/62004506e2fa0980777de5b1de045d5101d01f6c/assets/_defaults.scss */
 
 // Used in layout
@@ -26,7 +24,6 @@ $padding-16: 1rem !default;
   outline-color: currentColor;
   outline-color: -webkit-focus-ring-color;
 }
-
 
 /* https://github.com/alex-shpak/hugo-book/blob/62004506e2fa0980777de5b1de045d5101d01f6c/assets/_shortcodes.scss */
 
@@ -45,8 +42,10 @@ $padding-16: 1rem !default;
   label {
     display: inline-block;
     padding: $padding-8 $padding-16;
-    border-bottom: $padding-1 transparent;
     cursor: pointer;
+    border-bottom: solid;
+    border-bottom-color: #4565ae1f;
+    border-radius: 10px 10px 0px 0px;
   }
 
   .book-tabs-content {
@@ -57,14 +56,20 @@ $padding-16: 1rem !default;
     display: none;
   }
 
-  input[type="radio"]:checked + label {
-    border-bottom: $padding-1 solid var(--color-link);
+  input[type="radio"]:focus + label {
+    border-bottom: solid;
+    border-bottom-color: #4565ae1f;
   }
+
+  input[type="radio"]:checked + label {
+    border: solid;
+    border-color: #4565ae;
+    border-bottom-color: #4565ae;
+    background-color: #4565ae1f;
+  }
+
   input[type="radio"]:checked + label + .book-tabs-content {
     display: block;
-  }
-  input[type="radio"]:focus + label {
-    @include outline;
   }
 }
 

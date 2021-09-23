@@ -1,0 +1,14 @@
+/* these modify the original styles */
+
+/* make the content wider in the page, up from 760px */
+.article-container {
+    max-width: 85%;
+}
+
+/* change colour of hyperlinks to crick blue and transparent crick blue on hover */
+a:hover, a:focus {
+    color: #4565aeb5;
+}
+a, h3.article-title a:hover {
+    color: #4565ae;
+}

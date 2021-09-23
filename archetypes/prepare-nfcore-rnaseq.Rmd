@@ -1,0 +1,211 @@
+---
+title: Prepare nf-core/rnaseq
+weight: 1
+
+categories:
+
+tags:
+
+authors:
+  - christopher-barrington
+
+type: docs
+toc: true
+draft: false
+
+date: `r format(Sys.time(), "%Y-%m-%d")`
+created: {{ now.Format "2006-01-02" }}
+
+always_allow_html: true
+output:
+  html_document:
+    keep_md: yes
+    df_print: paged
+---
+
+<!-- initial set up chunks are invisible -->
+
+<!-- read the standard knitr setup script -->
+```{r knitr_setup, echo=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```
+
+<!-- make subdirectories to write into/any bash work -->
+```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```
+
+<!-- load any packages for the workbook -->
+```{r load_workbook_packages, opts.label='batch_chunk'}
+library(yaml)
+```
+
+<!-- read the standard setup script, loading well-used libraries -->
+```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
+```
+
+<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
+c() -> academic_doi
+c() -> software_doi
+```
+
+<!-- write a bibliography -->
+```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, eval=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```
+
+<!-- set a ggplot theme to use as a base in the workbook -->
+```{r define_global_ggplot_theme, opts.label='batch_chunk'}
+(theme_bw() +
+ theme(text=element_text(size=10, colour='black'),
+       panel.grid.minor=element_blank(),
+       strip.background=element_blank())) %>%
+theme_set()
+```
+
+<!-- any final things to set for this workbook -->
+```{r final_setup, opts.label='batch_chunk'}
+opts_chunk$set(cache=FALSE)
+```
+
+<!-- define slugs for other reports here for ease and reuse -->
+```{r define_slugs, opts.label='batch_chunk'}
+slugs <- list()
+```
+
+<!-- define shortcut links -->
+[CRICK]: https://www.crick.ac.uk
+[NFCORE RNASEQ]: https://nf-co.re/rnaseq
+[check strandedness]: {{< ref check-strandedness >}}
+
+<!-- end of initial set up chunks -->
+
+The [nf-core/rnaseq][NFCORE RNASEQ] pipeline will be run outside of this notebook, directly on CAMP. The configuration files for the pipeline will be created here for convenience and should be moved/copied/downloaded before being used.
+
+<!--more-->
+
+## Load the genome information
+
+First, we need to load the genome specification from the data repository. These values will be exported and used to align to the correct genome index.
+
+```{r show_genome, echo=FALSE}
+data(genome)
+
+genome %>%
+  enframe(name='', value='') %>%
+  kableExtra::kable(format=if_else(interactive(), 'markdown', 'html'))
+```
+
+Second, we need to determine whether this project has a single- or paired-end data.
+
+```{r get_fastq}
+system.file('primary_data', package='datarepository') -> fastq_path
+
+list.files(path=fastq_path, pattern='*fastq.gz', recursive=TRUE, full.names=FALSE) %>%
+  as.data.frame() %>%
+  set_names('file') %>%
+  extract(col=file, regex='(.+)/fastq/(.+?_S.+?_L.+?)_(R.)_.*', into=c('flowcell','sample','read.pair'), remove=FALSE) %>%
+  dlply(~flowcell+sample) %>%
+  pluck({length(.) %>% seq() %>% sample(, size=1)}, 'file') %>%
+  length() %>%
+  as.character() %>%
+  switch(`1`='single_end',
+         `2`='paired_end',
+         knit_exit(append='cannot determine pairedness', fully=TRUE)) -> pairedness
+```
+
+Now the variables can be exported ready to be used in the analysis. The `strandedness` should be set here manually; it was predicted in [another post][check strandedness].
+
+{{< callout "question" >}}
+Make sure that the `strandedness` is correct! The pipeline _should_ give a warning if it is wrong.
+{{< /callout >}}
+
+```{r export_variables}
+list(SPECIES=genome$species,
+     GENOME_VERSION=genome$version,
+     RELEASE=genome$release,
+
+     PRIMARY_DATA=system.file('primary_data', package='datarepository'),
+     STRANDEDNESS='reverse') %>%
+  do.call(what=Sys.setenv)
+```
+
+## Write a sample sheet
+
+The variables defined about are used to generate a [best-guess input sample sheet](files/input.csv).
+
+```{bash guess_sample_sheet, eval=pairedness=='single_end'}
+find -L ${PRIMARY_DATA} -name '*fastq.gz' -printf '%f %p\n' | \
+  sort -k2 --version-sort |\
+  sed 's/_\S*fastq.gz//' | \
+  awk --assign strandedness=${STRANDEDNESS} 'BEGIN{print "sample,fastq_1,fastq_2,strandedness"} {print $1 "," $2 ",," strandedness}' > files/input.csv
+```
+
+{{< callout warning >}}
+This needs to be extended to paired-end data!
+{{< /callout >}}
+
+## Write a shell script
+
+A [`bash` script](files/run_pipeline.sh) is written here that, again, takes the variables defined above.
+
+```{cat write_template_shell_script, engine.opts=list(file='files/run_pipeline.template.sh')}
+#! /usr/bin/bash
+
+# load modules
+module purge
+module load Nextflow/21.04.0 Singularity/3.4.2 CAMP_proxy
+
+PIPELINE_VERSION=3.3
+
+# define project parameters
+SPECIES_TC=`echo "${SPECIES}" | sed 's/^./\u&/'`
+SPECIES_LC=`echo "${SPECIES}" | sed 's/^./\u&/g'`
+GENOME_VERSION=${GENOME_VERSION}
+ENSEMBL_RELEASE=${RELEASE}
+
+GENOME_REFERENCE=/camp/svc/reference/Genomics/babs
+GENOME_REFERENCE=${GENOME_REFERENCE}/${SPECIES_LC}/ensembl/${GENOME_VERSION}/release-${ENSEMBL_RELEASE}
+
+# set work directory to scratch space
+export NXF_WORK=`echo $PWD/work/ | sed 's:^/camp/stp/babs/working/:/camp/stp/babs/scratch/:'`
+if [ ! -d "$NXF_WORK" ]; then
+    ln -s $NXF_WORK .
+fi
+export NXF_SINGULARITY_CACHEDIR=/camp/apps/misc/stp/babs/nf-core/singularity/rnaseq/${PIPELINE_VERSION}/
+
+# run the pipeline
+nextflow run nf-core/rnaseq \
+    --aligner star_rsem \
+    --fasta ${GENOME_REFERENCE}/genome/${SPECIES_TC}.${GENOME_VERSION}.dna_sm.primary_assembly.fa \
+    --gtf ${GENOME_REFERENCE}/gtf/${SPECIES_TC}.${GENOME_VERSION}.${ENSEMBL_RELEASE}.gtf \
+    --input input.csv \
+    --rsem_index /camp/stp/babs/working/patelh/genome/${GENOME_VERSION}/release-${ENSEMBL_RELEASE}/index/rsem/star-2.7.6a \
+    --email christopher.barrington@crick.ac.uk \
+    -profile crick \
+    -r ${PIPELINE_VERSION} \
+    -resume
+```
+
+```{bash substitute_variables_in_template, opts.label='batch_chunk'}
+envsubst '${SPECIES} ${GENOME_VERSION} ${RELEASE}' < files/run_pipeline.template.sh > files/run_pipeline.sh
+```
+
+```{bash show_substituted_shell_script, echo=TRUE, eval=FALSE, code=readLines('files/run_pipeline.sh')}
+```
+
+<!-- include a references section -->
+
+```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+```
+
+<!-- include a session information section -->
+
+```{r record_saved_objects, opts.label='batch_chunk'}
+#! names of object to be included in the table of hashes
+saved_objects <- c()
+```
+
+```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
+```
+
+<!-- end of session information -->
+

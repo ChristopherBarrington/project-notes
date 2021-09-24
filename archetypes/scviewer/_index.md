@@ -15,4 +15,4 @@ created: {{ now.Format "2006-01-02" }}
 
 <!-- TITLE='SCViewer' WEIGHT=99 hugo new --kind scviewer scviewer  -->
 
-<!-- loads the app from static directory -->
+<!-- loads the app from static/{{ .File.Path | path.Dir | path.Base }} directory -->

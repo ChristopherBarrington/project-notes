@@ -191,7 +191,7 @@ list() -> factor_levels
 list(experimental_table,
      asf_metadata) %>%
   Reduce(f=function(x,y) left_join(x=x, y=y, by='Sample.limsid')) %>%
-  mutate(donor_id=str_remove(Sample.Name, '_.*$')) -> complete_sample_sheet
+  mutate() -> complete_sample_sheet
 
 #! convert the variables to factors as required
 complete_sample_sheet[names(factor_levels)] %<>%

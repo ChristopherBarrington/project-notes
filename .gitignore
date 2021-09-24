@@ -1,17 +1,26 @@
 # IDEs
 .idea/
 
-# Hugo
-resources/
+# hugo
+hugo-cache/
 public/
+resources/
 jsconfig.json
-.Rproj.user
+
+# ignore typical symlinks to website outputs
+website-*
+
+# ignore the contents of the contents directory except for the .gitkeep
 content/*
 !content/.gitkeep
 
-# Mac
+# ignore the contents of the static directory, if one gets created
+static/*
+
+# mac
 .DS_Store
 
-# R
+# r
 *.Rproj
 renv
+.Rproj.user

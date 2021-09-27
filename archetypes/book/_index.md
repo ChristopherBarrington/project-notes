@@ -1,6 +1,6 @@
 ---
 title: {{ default (.File.Path | path.Dir | path.Base | replaceRE "^20\\d+-\\d+-\\d+-" "" | humanize | title) (getenv "TITLE") }}
-weight: 1
+weight:
 
 categories:
 

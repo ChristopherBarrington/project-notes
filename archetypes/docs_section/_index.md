@@ -1,7 +1,6 @@
 ---
 title: {{ .File.Path | path.Dir | path.Base | humanize | title }}
-summary:
-weight: 1
+weight:
 
 categories:
 
@@ -17,3 +16,7 @@ type: docs
 toc: false
 draft: false
 ---
+
+Anything here is included in the summary.
+
+<!--more-->

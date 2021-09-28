@@ -1,6 +1,6 @@
 /* these modify the original styles */
 
-/* make the content wider in the page, up from 760px */
+/***** make the content wider in the page, up from 760px *****/
 .article-container {
     max-width: 85%;
 }
@@ -9,10 +9,68 @@
     max-width: 95%;
 }
 
-/* change colour of hyperlinks to crick blue and transparent crick blue on hover */
+/***** standard hyperlinks *****/
+a {
+    /* standard hyperlinks */
+    color: #4565ae; // crick blue
+}
+
 a:hover, a:focus {
+    /* when a standard hyperlink is hovered over/focused on */
+    color: #4565aeb5; // transluscent crick blue
+}
+
+.site-footer a {
+    /* hyperlinks in the footer */
+    color: #bb90c1; // crick purple
+}
+
+.article-style p a {
+    /* hyperlinks in the main text */
+    background-color: #4565ae0d; // more translucent crick blue
+    padding-top: 2px;
+}
+
+/***** navbar links *****/
+.navbar .navbar-nav .nav-link.active {
+    /* when a section is active */
+    color: #4565ae !important;
+}
+
+#navbar-main .main-menu-item ul li .nav-link:hover, #navbar-main .main-menu-item ul li .nav-link:focus {
+    /* when a navbar item is hovered over or focused on */
     color: #4565aeb5;
 }
-a, h3.article-title a:hover {
+
+/***** table of contents in left sidebar *****/
+.docs-sidebar .nav>.active:hover>a, .docs-sidebar .nav>.active:focus>a, .docs-sidebar .nav>.active>a {
+    /* when a left sidebar item is hovered over or focused on or active */
     color: #4565ae;
+}
+
+.docs-sidebar .nav>li>a:hover, .docs-sidebar .nav>li>a:focus {
+    /* when a lift sidebar item is hovered over or focused on but not active */
+    color: #4565aeb5;
+}
+
+/***** anchors at the end of headings *****/
+.anchorjs-link {
+    /* anchor link when cursor is over heading */
+    color: #77b72a7d; // translucent crick green
+}
+
+.anchorjs-link:hover, .anchorjs-link:focus {
+    /* anchor link when hovered over or focused on */
+    color: #77b72a; // crick green
+}
+
+/***** table of contents links in right sidebar *****/
+#TableOfContents li a.active {
+    /* when the right sidebar item is active (has been scrolled to) */
+    color: #4565ae;
+}
+
+#TableOfContents li a:hover, #TableOfContents li a:focus {
+    /* when a right sidebar item is hovered over or focussed on */
+    color: #4565aeb5;
 }

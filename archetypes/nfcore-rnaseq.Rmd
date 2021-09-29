@@ -44,10 +44,10 @@ library(biomaRt)
 
 <!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c(RSEM='10.1186%2F1471-2105-12-323',
-  STAR='10.1093/bioinformatics/bts635',
-  nfcore='10.1038/s41587-020-0439-x') -> academic_doi
-c(nextflow='10.1038/nbt.3820') -> software_doi
+c(nextflow='10.1038/nbt.3820',
+  nfcore='10.1038/s41587-020-0439-x',
+  RSEM='10.1186%2F1471-2105-12-323',
+  STAR='10.1093/bioinformatics/bts635') -> bibliography_doi
 ```
 
 <!-- write a bibliography -->

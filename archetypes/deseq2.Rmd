@@ -51,8 +51,7 @@ library(DEGreport)
 <!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
 c(deseq2='10.18129/B9.bioc.DESeq2',
-  tximport='10.18129/B9.bioc.tximport') -> academic_doi
-c() -> software_doi
+  tximport='10.18129/B9.bioc.tximport') -> bibliography_doi
 ```
 
 <!-- write a bibliography -->

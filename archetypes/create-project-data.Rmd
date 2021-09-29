@@ -45,12 +45,11 @@ library(yaml)
 
 <!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c() -> academic_doi
-c() -> software_doi
+c() -> bibliography_doi
 ```
 
 <!-- write a bibliography -->
-```{r write_bibliography, dependson='add_doi_to_bibliography', eval={length(academic_doi)+length(software_doi)}>0, cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```{r write_bibliography, dependson='add_doi_to_bibliography', eval={length(bibliography_doi)}>0, cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
 ```
 
 <!-- set a ggplot theme to use as a base in the workbook -->

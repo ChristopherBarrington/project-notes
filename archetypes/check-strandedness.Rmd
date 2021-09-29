@@ -45,8 +45,7 @@ library(yaml)
 <!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
 c(RSeQC='10.1093/bioinformatics/bts356',
-  STAR='10.1093/bioinformatics/bts635') -> academic_doi
-c() -> software_doi
+  STAR='10.1093/bioinformatics/bts635') -> bibliography_doi
 ```
 
 <!-- write a bibliography -->

@@ -92,3 +92,6 @@ related:
       weight: 100
     - name: categories
       weight: 70
+
+publications:
+  citation_style: apa

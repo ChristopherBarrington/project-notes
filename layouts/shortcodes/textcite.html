@@ -1,0 +1,8 @@
+<!-- https://github.com/wowchemy/wowchemy-hugo-themes/blob/main/wowchemy/layouts/shortcodes/cite.html -->
+
+{{- $page := .Get 0 -}}
+
+{{- with site.GetPage $page -}}
+  {{- $item := . -}}
+  <a href="{{ path.Dir $item.File | path.Join "/" }}">{{ (index $item.Params.authors 0) | replaceRE ".* " "" }}, {{ time.Format "2006" $item.Params.date }}</a>
+{{- end -}}

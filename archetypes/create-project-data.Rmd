@@ -82,7 +82,7 @@ All data defining this project are gathered in this post. We create `R` objects 
 
 ## Link to the raw sequencing files
 
-The FastQ files for whole projects are collected in the ASF outputs/BABS inputs directory. A link is made here between the ASF directory and the data-repository.
+The FastQ files for whole projects are collected in the ASF outputs/BABS inputs directory. If a link between the ASF data directory and the data-repository is not found one will be made.
 
 ```{r link_to_primary_data}
 project <- read_dotbabs()
@@ -106,22 +106,16 @@ if(!file.exists(link_path))
 
 ## Save the genome information
 
-The genome is defined here, using the YAML file (though it could be defined any other way).
+The genome is defined here and saved to the data-repository.
 
 ```{r define_genome}
 list(species='homo_sapiens', version='GRCh38',
-     source='ensembl', release='95') -> genome_defaults
-
-species_to_organism <- function(x='a_species')
-  when(x=='a_species'~'anorganism',
-       TRUE~str_replace(x, '^(.)(.*_)(.*)$', '\\1\\3'))
-
-system.file('docs/genome.yaml', package='datarepository') %>%
-  when(file.exists(.)~read_yaml(.),
-       TRUE~genome_defaults) %>%
+     source='ensembl', release='95')  %>%
   modify_at('release', as.character) %>%
-  list_modify(organism=species_to_organism(x=.$species)) %>%
-  modifyList(x=genome_defaults) -> genome
+  list_modify(organism=str_replace(.$species, pattern='^(.)(.*_)(.*)$', replacement='\\1\\3'),
+              org.db={str_replace(.$species, pattern='^(.).*_(.).*$', replacement='\\1\\2') %>%
+                        str_to_title() %>%
+                        str_c('org', ., 'eg', 'db', sep='.')}) -> genome
 
 save(genome)
 ```
@@ -136,7 +130,7 @@ genome %>%
 
 ## Create a BioMart connection
 
-Here, a connection to the Ensembl archive is created and saved to the `projectData`.
+Here, a connection to the Ensembl archive is created and saved to the `data-repository`.
 
 ```{r connect_to_biomart}
 data(genome)
@@ -152,7 +146,7 @@ The `mart` object connects to ``r mart@host %>% domain()``.
 
 ## Read and parse metadata
 
-In this section, a project sample sheet is created. This may include information from the [ASF sample sheet](files/asf.xlsx), the [project sample table](files/experimental_table.xlsx) agreed at the design meetings and any other sample information.
+In this section, a project sample sheet is created. This may include information from the [ASF sample sheet](files/asf.xlsx), the [project sample table](files/project_design.xlsx) agreed at the design meetings and any other sample information.
 
 First, the ASF sample sheet is read. It contains a lot of information about the library preparation and may only be required for troubleshooting.
 
@@ -162,17 +156,17 @@ system.file('sample_sheets/asf.xlsx', package='datarepository') %>%
   arrange({mixedorder(Sample.limsid) %>% order()}) -> asf_metadata
 ```
 
-Now the agreed experimental table is read, and any other sample information should be read too.
+Now the agreed project design is read, and any other sample information should be read too.
 
 ```{r read_project_samples}
-system.file('sample_sheets/experimental_table.xlsx', package='datarepository') %>%
+system.file('sample_sheets/project_design.xlsx', package='datarepository') %>%
   read.xlsx() %>%
   when(is.element('Sample.limsid', colnames(.))~.,
-       TRUE~knit_exit('No LIMS ID in experimental_table!')) %>%
-  arrange({mixedorder(Sample.limsid) %>% order()}) -> experimental_table
+       TRUE~knit_exit('No LIMS ID in project_design!')) %>%
+  arrange({mixedorder(Sample.limsid) %>% order()}) -> project_design
 ```
 
-{{< callout notice >}}
+{{< callout "notice" >}}
 Please provide additional sample metadata, such as unforeseen batch effects so they can be included here. (There's an email link in the navigation bar.)
 {{< /callout >}}
 
@@ -184,18 +178,22 @@ Any project-specific additions/modifications to the metadata are made in the fol
 #! any project-specific modifications should be made here
 
 #! list of variables to convert to factors and the levels that they should have
+#! can optionally be a named vector
 list() -> factor_levels
 
 #! define the complete set of metadata for the project
-list(experimental_table,
+list(project_design,
      asf_metadata) %>%
   Reduce(f=function(x,y) left_join(x=x, y=y, by='Sample.limsid')) %>%
   mutate() -> complete_sample_sheet
 
 #! convert the variables to factors as required
 complete_sample_sheet[names(factor_levels)] %<>%
-  Map(data=., variable=names(.), function(data, variable)
-    factor(x=data, levels=factor_levels[[variable]]))
+  Map(data=., levels=factor_levels, function(data, levels)
+    data %>%
+      fct_relevel(levels) %>%
+      when(names(levels) %>% is.null() ~ .,
+           TRUE ~ fct_recode(., !!!levels)))
 
 #! subset the complete sample sheet
 complete_sample_sheet %>%
@@ -205,11 +203,17 @@ complete_sample_sheet %>%
 save(complete_sample_sheet, project_sample_sheet)
 ```
 
-{{< callout result >}}
+{{< callout tick >}}
 The `complete_sample_sheet` contains the LIMS identifier and all sample metadata that is available. The `project_sample_sheet` is a subset of `complete_sample_sheet`
 {{< /callout >}}
 
-The first `r pmin(10, nrow(project_sample_sheet))` rows of the `project_sample_sheet` are shown below:
+```{r text_n_rows_project_sample_sheet, echo=FALSE, results='asis'}
+project_sample_sheet %>%
+  nrow() %>%
+  when(.>10~comma(.) %>% sprintf(fmt='The first 10 (of %s) rows of the `project_sample_sheet` are shown below.'),
+       TRUE~'The complete `project_sample_sheet` is shown below.') %>%
+  cat()
+```
 
 ```{r show_project_sample_sheet, echo=FALSE}
 head(project_sample_sheet, n=10) %>%

@@ -13,8 +13,8 @@ input.toggle {
 // Used in layout
 $padding-1: 1px !default;
 $padding-4: 0.25rem !default;
-$padding-8: 0.5rem !default;
-$padding-16: 1rem !default;
+$padding-8: 0.01rem !default;
+$padding-16: 0.5rem !default;
 
 
 /* https://github.com/alex-shpak/hugo-book/blob/62004506e2fa0980777de5b1de045d5101d01f6c/assets/_utils.scss */
@@ -45,7 +45,7 @@ $padding-16: 1rem !default;
     cursor: pointer;
     border-bottom: solid;
     border-bottom-color: #4565ae1f;
-    border-radius: 10px 10px 0px 0px;
+    border-radius: 5px 5px 0px 0px;
   }
 
   .book-tabs-content {
@@ -65,6 +65,7 @@ $padding-16: 1rem !default;
     border: solid;
     border-color: #4565ae;
     border-bottom-color: #4565ae;
+    border-width: 1px;
     background-color: #4565ae1f;
   }
 

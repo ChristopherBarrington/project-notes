@@ -11,6 +11,18 @@ div.alert-  > div:first-child::before, div.alert-info > div:first-child::before,
   border-color: #12537E;
 }
 
+/* override warning callout colours */
+/* red colours */
+div.alert-warning > div:first-child::before {
+  color: #eb3834;
+}
+
+.alert-warning {
+  color: #eb3834;
+  background-color: #eb383414;
+  border-color: #eb3834;
+}
+
 /* automated callout with a robot glyph */
 /* robot glyph, grey colours */
 div.alert-automated > div:first-child::before {

@@ -71,6 +71,16 @@ div.alert-tick > div:first-child::before {
   background-color: #ddf7dd;
   border-color: #31ca31;}
 
+/* notice callout for showing something to improve */
+/* screwriver/spanner glyph, yellow colours */
+div.alert-wip > div:first-child::before {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  color: #FFC73A;
+  content: '\f7d9'
+}
 
-
-
+.alert-wip {
+  color: #FFC73A;
+  background-color: #FFC73A14;
+  border-color: #FFC73A;}

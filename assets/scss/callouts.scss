@@ -45,14 +45,14 @@ div.alert-automated > div:first-child::before {
 /* question mark in a circle glpyh, blue colours same as `note` */
 div.alert-question > div:first-child::before {
   font-family: 'Font Awesome 5 Free';
-  color: #417ff2;
+  color: #0045d0;
   content: '\f059';
 }
 
 .alert-question {
-  color: #417ff2;
-  background-color: #417ff214;
-  border-color: #417ff2;
+  color: #0045d0;
+  background-color: #0045d014;
+  border-color: #0045d0;
 }
 
 /* result callout for interpretation */

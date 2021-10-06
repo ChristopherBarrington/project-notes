@@ -42,6 +42,9 @@ library(BiocParallel)
 library(biomaRt)
 library(pheatmap)
 library(DEGreport)
+library(UpSetR)
+library(VennDiagram)
+library(ggrepel)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
@@ -50,8 +53,12 @@ library(DEGreport)
 
 <!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c(deseq2='10.18129/B9.bioc.DESeq2',
-  tximport='10.18129/B9.bioc.tximport') -> bibliography_doi
+c(deseq2='10.1186/s13059-014-0550-8',
+  deseq2_bioc='10.18129/B9.bioc.DESeq2',
+  tximport='10.12688/f1000research.7563.1',
+  tximport_bioc='10.18129/B9.bioc.tximport',
+  degreport='10.18129/B9.bioc.DEGreport',
+  upsetr='10.1093/bioinformatics/btx364') -> bibliography_doi
 ```
 
 <!-- write a bibliography -->
@@ -95,11 +102,12 @@ slugs <- list()
 [tximport from rsem]: https://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html#RSEM
 
 [project data post]: {{< ref "create-project-data" >}}
+[project data post sample sheet]: {{< ref "create-project-data#read-and-parse-metadata" >}}
 [nfrnaseq post]: {{< ref "nfcore-rnaseq" >}}
 
 <!-- end of initial set up chunks -->
 
-Gene expression has been quantified by the [nf-core/rnaseq][nfcore rnaseq] pipeline in the [{{< post-title "nfcore-rnaseq" >}}][nfranseq post] post and will now be read into a [DESeq2][deseq2 doi] `dds` object for downstream analysis. The object will be saved and can be loaded in future posts. We can then examine relationships between datasets and test for differential expression between samples.
+Gene expression has been quantified by the [nf-core/rnaseq][nfcore rnaseq] pipeline in the [{{< post-title "nfcore-rnaseq" >}}][nfrnaseq post] post and will now be read into a [DESeq2][deseq2 doi] `dds` object for downstream analysis. The object will be saved and can be loaded in future posts. We can then examine relationships between datasets and test for differential expression between samples.
 
 <!--more-->
 
@@ -134,9 +142,9 @@ getBM(mart=mart, attributes=c('ensembl_gene_id', 'external_gene_name', 'descript
          !!!additional_attributes) -> ensembl_to_name
 ```
 
-The `project_sample_sheet` was created in the [{{< post-title "create-project-data" >}}][project data post] post and contains a description of each sample using metadata from the ASF-supplied sample sheet, the experimental table and any other provided information. It is loaded into this post using the `datarepository` package. Row names of `project_sample_sheet` should be the names of the datasets for use as a `colData` object.
+The `project_sample_sheet` was created in the [{{< post-title "create-project-data" >}}][project data post] post and contains a description of each sample using metadata from the ASF-supplied sample sheet, the project design and any other provided information. It is loaded into this post using the `datarepository` package. Row names of `project_sample_sheet` should be the names of the datasets for use as a `colData` object.
 
-Now a DESeq2 (v`r packageVersion('DESeq2')`) dataset object is created from the `tximport` list using [`DESeq2::DESeqDataSetFromTximport`][deseq2 vignette tximport] and the `project_sample_sheet`.
+Now a DESeq2 dataset object is created from the `tximport` list using [`DESeq2::DESeqDataSetFromTximport`][deseq2 vignette tximport] and the `project_sample_sheet`.
 
 A dummy design is applied here, it will be replaced later when the sample comparisons are defined.
 
@@ -153,6 +161,21 @@ metadata(dds)$gene_information <- ensembl_to_name
 
 assay(dds, 'vst') <- varianceStabilizingTransformation(object=dds, blind=TRUE) %>% assay()
 # assay(dds, 'rlog') <- rlogTransformation(object=dds, blind=TRUE) %>% assay()
+```
+
+The sample sheet was defined in [{{< post-title "create-project-data" >}}][] and is shown below.
+
+```{r text_n_rows_project_sample_sheet, echo=FALSE, results='asis'}
+project_sample_sheet %>%
+  nrow() %>%
+  when(.>10~comma(.) %>% sprintf(fmt='The first 10 (of %s) rows of the `project_sample_sheet` are shown below.'),
+       TRUE~'The complete `project_sample_sheet` is shown below.') %>%
+  cat()
+```
+
+```{r show_project_sample_sheet, echo=FALSE}
+head(project_sample_sheet, n=10) %>%
+  kable(format=if_else(interactive(), 'markdown', 'html'))
 ```
 
 <!--  -->
@@ -322,7 +345,8 @@ These tabs need to be generalised! Nested list of plot objects?
 ```{r pca_plots_all_datasets_scatter, dependson=c('make_dds', 'pca_plot_functions'), echo=FALSE}
 make_covariate_association(dds=dds, assay='vst', labels={c('col1', 'col2', 'col3', 'col4') %>% rev()}) %>%
   resize_and_show(height={pluck(.$data, 'Covariate') %>% unique() %>% length()}*0.2,
-                  aspect={pluck(.$data, 'PC') %>% unique() %>% length()}/{pluck(.$data, 'Covariate') %>% unique() %>% length()})
+                  aspect={pluck(.$data, 'PC') %>% unique() %>% length()}/{pluck(.$data, 'Covariate') %>% unique() %>% length()},
+                  clip=FALSE)
 
 assay(dds, 'vst') %>%
   make_pca_plot(dds=dds, shape='col1:col2', colour='col3', label=NULL) %>%
@@ -519,22 +543,33 @@ save(results_summary)
 
 These genes have been validated and their expression changes visualised here. The gene name and the `outcome` of the comparison is indicated (recall that a '\*' indicates a significant change).
 
-```{r set_validated_genes, echo=FALSE}
-c() -> validated_genes
+```{r set_validated_genes}
+data(mart)
+
+data.frame(gene_name=c('gene1', 'gene2', 'gene3'),
+           ensembl_gene_id=c('ENS_ID1', 'ENS_ID2', 'ENS_ID3')) -> validated_genes
+
+validated_genes %<>%
+  when(class(.)=='character'~getBM(attributes=c('external_gene_name', 'ensembl_gene_id'), filters='external_gene_name', mart=mart),
+       TRUE~.) %>%
+  when(nrow(.)==0~c(),
+       TRUE~deframe(.))
 ```
 
 These plots show the normalised expression counts (via the `DESeq2::counts(norm=TRUE)` function) in all comparisons defined above.
 
 ```{r get_feature_count_plots, dependson=c('set_validated_genes','collect_results'), eval=length(validated_genes)>0}
-data(mart)
-
-validated_genes %<>%
-  getBM(attributes=c('external_gene_name', 'ensembl_gene_id'), filters='external_gene_name', mart=mart) %>%
-  deframe()
-
 plot_feature_counts <- function(dds, features, x) {
-  if(missing(x))
-    x <- metadata(dds) %>% pluck('contrast', 'group')
+  if(missing(x) && {metadata(dds) %>% names() %>% is_in(x='contrast')})
+    metadata(dds) %>%
+      pluck('contrast', 'group') -> x
+
+  if(missing(x) && {metadata(dds) %>% names() %>% is_in(x='reduced')})
+    list(design(dds), metadata(dds) %>% pluck('reduced')) %>%
+      lapply(terms) %>%
+      llply(attr, which='term.labels') %>%
+      Reduce(f=setdiff) %>%
+      str_c(collapse=':') -> x
 
   counts(object=dds, norm=TRUE)[features,] %>%
     as.data.frame() %>%
@@ -562,7 +597,8 @@ plot_feature_counts <- function(dds, features, x) {
     scale_y_continuous(labels=comma) +
     scale_colour_brewer(palette='Set2', labels=str_to_title) +
     facet_wrap(~facet_group, scales='free') +
-    theme(axis.title.x=element_blank(),
+    theme(axis.text.x=element_text(angle=40, hjust=1, vjust=1),
+          axis.title.x=element_blank(),
           legend.title=element_blank())
 }
 
@@ -716,7 +752,7 @@ for(i in names(plots_list)) {
 
 ### Heatmaps of variable features
 
-These heatmaps select the top `n` features by their variability across the `dds`.
+These heatmaps select the top `n` features by their variability across the `dds`. These are _not necessarily_ significantly differentially expressed.
 
 ```{r get_variable_features_heatmaps, dependson='collect_results'}
 make_variable_features_heatmap <- function(dds, n, annotations=NULL, assay='vst', opts=list()) {
@@ -858,25 +894,87 @@ all_dds %>%
 
 <!--  -->
 
+### Similarity between gene sets
+
+The genes and direction of change will be compared to show the similarity of gene expression changes between comparisons.
+
+```{r get_de_gene_sets, dependson='collect_results'}
+all_dds %>%
+  keep(function(x) metadata(x) %>% names() %>% is_in(x='contrast')) %>%
+  names() %>%
+  magrittr::extract(all_dds, .) %>%
+  llply(function(dds)
+    dds %>%
+      metadata() %>%
+      pluck('results') %>%
+      filter(str_detect(outcome, '\\*$')) %>%
+      select(ensembl_gene_id, outcome) %>%
+      left_join(y={dds %>% metadata() %>% pluck('gene_information') %>% select(ensembl_gene_id, gene_name)}, by='ensembl_gene_id') %>%
+      append(list(sep='%')) %>%
+      do.call(what=str_c)) -> de_gene_sets
+```
+
+```{r show_venn_compare_de_gene_sets_plots, dependson='get_de_gene_sets', fig.width=3, fig.height=3}
+palette <- brewer.pal(name='Dark2', n=3)
+category_distances <- c(0.1, 0.1, 0.05)
+
+venn.diagram(x=de_gene_sets,
+             filename=NULL,
+             cat.fontface='bold',
+             cat.col=palette,
+             cat.dist=category_distances,
+             col=palette,
+             fill=sapply(X=palette, FUN=alpha, alpha=0.3),
+             margin=0.1) %>%
+  show_newpage_grid()
+```
+
+```{r show_upsetr_compare_de_gene_sets_plots, dependson='get_de_gene_sets', echo=FALSE, fig.width=4, fig.height=3}
+fromList(de_gene_sets) %>%
+  upset()
+```
+
+A table of [gene responses in each comparison](files/de_gene_sets_comparison.xlsx) is created and a snippet shown below.
+
+```{r show_de_gene_sets, dependon='get_de_gene_sets'}
+de_gene_sets %>%
+  ldply(.id='comparison', data.frame) %>%
+  set_names(c('comparison', 'id')) %>%
+  separate(col='id', into=c('ensembl_gene_id', 'direction', 'gene_name'), sep='%') %>%
+  spread(key=comparison, value=direction, fill='nde') %T>%
+  write.xlsx(file='files/de_gene_sets_comparison.xlsx') %>%
+  sample_n(size=15) %>%
+  arrange(gene_name) %>%
+  kable(format=if_else(interactive(), 'markdown', 'html'))
+```
+
+<!--  -->
+
 ### MA plots
 
 These plots show the distribution of genes in the data by their `baseMean` (mean expression across all datasets in the `dds`) and their shrunk log2FoldChange in a contrast. Genes considered as differentially expressed are significant when `alpha==`r percent(target_alpha)``.
 
-```{r get_ma_plots, dependson='collect_results'}
-make_ma_plot <- function(results, lfc='shrunk.log2FoldChange', maxLFC=3)
+```{r set_ma_plot_labels, dependson='set_validated_genes'}
+ma_plot_labels <- validated_genes
+```
+
+```{r get_ma_plots, dependson=c('collect_results', 'set_ma_plot_labels')}
+make_ma_plot <- function(results, lfc='shrunk.log2FoldChange', maxLFC=3, labels)
   results %>%
     as.data.frame() %>%
     filter(str_detect(outcome, '^(up|down)\\*?$')) %>%
-    rename(.lfc=lfc) %>%
+    left_join(y={validated_genes %>% enframe(name='label', value='ensembl_gene_id')}, by='ensembl_gene_id') %>%
+    rename_at(lfc, function(y) 'y') %>%
     arrange(desc(padj)) %>% {
       ggplot(data=.) +
-      aes(x=baseMean, y=.lfc, colour=padj<=alpha, shape=abs(.lfc)>maxLFC) +
+      aes(x=baseMean, y=y, shape=abs(y)>maxLFC, colour=padj<=alpha) +
       labs(colour='Significant', x='baseMean', y=lfc) +
       geom_point(size=0.5, alpha=0.5) +
+      geom_text_repel(data=filter(., !is.na(label)), mapping=aes(label=label), box.padding=0.5, max.overlaps=Inf, colour='black') +
       scale_x_continuous(trans='log10', breaks=major_log_breaks(), labels=numeric_to_si) +
       scale_y_continuous(breaks={major_log_breaks(base=2) %>% c(.*-1, .) %>% c(0)}, limits=maxLFC*c(-1,1), oob=squish) +
-      scale_colour_manual(values=c(`TRUE`='#E41A1C', `FALSE`='#999999'), labels=c(`TRUE`='p≤alpha', `FALSE`='p≥alpha')) +
       scale_shape_manual(values=c(`TRUE`=17, `FALSE`=16), labels=c(`FALSE`='Outside', `FALSE`='Inside')) +
+      scale_colour_manual(values=c(`TRUE`='#E41A1C', `FALSE`='#999999'), labels=c(`TRUE`='p≤alpha', `FALSE`='p≥alpha')) +
       annotation_logticks(sides='b', base=10, outside=TRUE, short=unit(0.4,'mm'), mid=unit(0.7,'mm'), long=unit(1,'mm')) +
       annotation_logticks(sides='l', base=2, outside=TRUE, short=unit(0.4,'mm'), mid=unit(0.7,'mm'), long=unit(1,'mm')) +
       coord_cartesian(clip=FALSE) +
@@ -888,7 +986,7 @@ make_ma_plot <- function(results, lfc='shrunk.log2FoldChange', maxLFC=3)
 all_dds %>%
   llply(metadata) %>%
   llply(pluck, 'results') %>%
-  llply(make_ma_plot, lfc='shrunk.log2FoldChange', maxLFC=3) -> plots_list
+  llply(make_ma_plot, lfc='shrunk.log2FoldChange', maxLFC=3, labels=ma_plot_labels) -> plots_list
 ```
 
 {{< tabs "show_ma_plots" >}}
@@ -954,9 +1052,9 @@ for(i in names(plots_list)) {
 
 <!--  -->
 
-### Clustered expression profiles
+### Grouped expression changes
 
-Here, the [DEGreport package][degreport bioc] is used to cluster expression profiles of the genes identified in the LRT test(s) as interesting.
+Here, the [DEGreport package][degreport bioc] is used to cluster expression profiles of the genes identified in the LRT test(s).
 
 ```{r get_degPatterns, dependson='collect_results'}
 get_degPatterns <- function(dds, x_variable) {
@@ -1025,7 +1123,7 @@ all_dds %>%
 ```{r show_degPatterns_plots, dependson=c('get_degPatterns_plots'), echo=FALSE, results='asis'}
 for(i in names(plots_list)) {
   sprintf('{{< tab "%s" >}}', i) %>% cat()
-  plots_list[[i]] %>% resize_and_show(width=2, clip=FALSE)
+  plots_list[[i]] %>% resize_and_show(width=2.5, clip=FALSE)
   cat('{{< /tab >}}')
 }
 ```
@@ -1166,6 +1264,12 @@ all_dds %>%
   invisible()
 system(command='cd scratch && zip - metacore/*tsv > ../files/metacore.zip')
 ```
+
+<!--  -->
+
+## Methods section
+
+> Quantified gene expression tables were loaded into R (`r R.version[c('major','minor')] %>% unlist() %>% str_c(collapse='.')`) using the tximport package (`r packageVersion('tximport')`, {{< textcite "https-doi-org-10-18129-b-9-bioc-tximport" >}}). Differentially expressed genes were identified using the DESeq2 package (`r packageVersion('DESeq2')`, {{< textcite "love-2014" >}}) and DEGreport (`r packageVersion('DEGreport')`, {{< textcite "https-doi-org-10-18129-b-9-bioc-degreport" >}}) subsequently used to cluster expression profiles of significant genes in an LRT test.
 
 <!-- include a references section -->
 

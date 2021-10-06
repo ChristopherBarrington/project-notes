@@ -1,16 +1,27 @@
 
+/* override default callouts to make them look like the question callout */
+/* dark blue colours` */
+div.alert-  > div:first-child::before, div.alert-info > div:first-child::before, div.alert-note > div:first-child::before {
+  color: #12537E;
+}
+
+.alert-, .alert-info, .alert-note {
+  color: #12537E;
+  background-color: #12537E14;
+  border-color: #12537E;
+}
+
 /* automated callout with a robot glyph */
 /* robot glyph, grey colours */
 div.alert-automated > div:first-child::before {
   font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
   color: #696969;
   content: '\f544';
 }
 
 .alert-automated {
   color: #696969;
-  background-color: #EEEEEE;
+  background-color: #69696914;
   border-color: #696969;
   text-align: center;
 }
@@ -19,14 +30,14 @@ div.alert-automated > div:first-child::before {
 /* question mark in a circle glpyh, blue colours same as `note` */
 div.alert-question > div:first-child::before {
   font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
+  color: #417ff2;
   content: '\f059';
 }
 
 .alert-question {
-  color: #12537E;
-  background-color: #F6FBFE;
-  border-color: #1976D2;
+  color: #417ff2;
+  background-color: #417ff214;
+  border-color: #417ff2;
 }
 
 /* result callout for interpretation */
@@ -39,48 +50,45 @@ div.alert-result > div:first-child::before {
 
 .alert-result {
   color: #794880;
-  background-color: #f9f5f9;
-  border-color: #ac77b3;
+  background-color: #79488014;
+  border-color: #794880;
 }
 
 /* notice callout for attracting attention but not warning */
 /* exclamation glyph, orange colours */
 div.alert-notice > div:first-child::before {
   font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-  color: #d88c00;
+  color: #ff8a00;
   content: '\f12a'
 }
 
 .alert-notice {
-  color: #d88c00;
-  background-color: #fff8eb;
-  border-color: #ffba3b;}
+  color: #ff8a00;
+  background-color: #ff8a0014;
+  border-color: #ff8a00;}
 
-/* notice callout for attracting attention but not warning */
+/* tick callout for attracting attention but not warning */
 /* tick glyph, green colours */
 div.alert-tick > div:first-child::before {
   font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
   color: #269b26;
   content: '\f058'
 }
 
 .alert-tick {
   color: #269b26;
-  background-color: #ddf7dd;
-  border-color: #31ca31;}
+  background-color: #269b2614;
+  border-color: #269b26;}
 
-/* notice callout for showing something to improve */
+/* work in progress callout for showing something to improve */
 /* screwriver/spanner glyph, yellow colours */
 div.alert-wip > div:first-child::before {
   font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-  color: #FFC73A;
+  color: #e9a928;
   content: '\f7d9'
 }
 
 .alert-wip {
-  color: #FFC73A;
-  background-color: #FFC73A14;
-  border-color: #FFC73A;}
+  color: #e9a928;
+  background-color: #e9a92814;
+  border-color: #e9a928;}

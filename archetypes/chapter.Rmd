@@ -93,6 +93,12 @@ Anything here is included in the summary.
 
 
 
+<!-- a methods section for a manuscript, use {{< textcite "author-year" >}} -->
+
+## Methods section
+
+> A description of this method for a manuscript.
+
 <!-- include a references section -->
 
 ```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}

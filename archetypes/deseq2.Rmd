@@ -1265,7 +1265,7 @@ all_dds %>%
 system(command='cd scratch && zip - metacore/*tsv > ../files/metacore.zip')
 ```
 
-<!--  -->
+<!-- a methods section for a manuscript, use {{< textcite "author-year" >}} -->
 
 ## Methods section
 

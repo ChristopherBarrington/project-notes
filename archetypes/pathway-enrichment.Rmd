@@ -579,7 +579,7 @@ for(msigdb_pathway_set in {plots_list %>% names()}) {
 cat('{{< /tabs >}}')
 ```
 
-<!--  -->
+<!-- a methods section for a manuscript, use {{< textcite "author-year" >}} -->
 
 ## Methods section
 

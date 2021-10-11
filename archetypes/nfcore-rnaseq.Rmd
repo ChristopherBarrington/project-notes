@@ -245,7 +245,7 @@ metrics %>%
 This needs to be adapted for paired-end datasets!
 {{< /callout >}}
 
-<!--  -->
+<!-- a methods section for a manuscript, use {{< textcite "author-year" >}} -->
 
 ## Methods section
 

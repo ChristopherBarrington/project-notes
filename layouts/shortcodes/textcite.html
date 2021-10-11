@@ -1,8 +1,7 @@
 <!-- https://github.com/wowchemy/wowchemy-hugo-themes/blob/main/wowchemy/layouts/shortcodes/cite.html -->
 
-{{- $page := .Get 0 -}}
-
-{{- with site.GetPage $page -}}
+{{- $cite_key := .Get 0 -}}
+{{- with site.GetPage $cite_key -}}
   {{- $item := . -}}
-  <a href="{{ path.Dir $item.File | path.Join "/" }}">{{ (index $item.Params.authors 0) | replaceRE ".* " "" }}, {{ time.Format "2006" $item.Params.date }}</a>
+  <a href="#" class="js-cite-modal" data-filename="{{ path.Join (path.Dir $item.File) "cite.bib" | path.Join .Site.BaseURL }}">{{ (index $item.Params.authors 0) | replaceRE ".* " "" }}, {{ time.Format "2006" $item.Params.date }}</a>
 {{- end -}}

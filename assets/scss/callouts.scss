@@ -107,3 +107,16 @@ div.alert-wip > div:first-child::before {
   color: #e9a928;
   background-color: #e9a92814;
   border-color: #e9a928;}
+
+/* future work callout for showing things we could do */
+/* binoculars glyph, yellow colours */
+div.alert-future_work > div:first-child::before {
+  font-family: 'Font Awesome 5 Free';
+  color: #e9a928;
+  content: '\f1e5'
+}
+
+.alert-future_work {
+  color: #e9a928;
+  background-color: #e9a92814;
+  border-color: #e9a928;}

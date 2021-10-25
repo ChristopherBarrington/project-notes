@@ -67,13 +67,15 @@ opts_chunk$set(cache=FALSE)
 
 <!-- define slugs for other reports here for ease and reuse -->
 ```{r define_slugs, opts.label='batch_chunk'}
-slugs <- list()
+slugs <- list(`check strandedness`='check-strandedness')
 ```
 
 <!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 [NFCORE RNASEQ]: https://nf-co.re/rnaseq
-[check strandedness]: {{< ref check-strandedness >}}
+
+```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
+```
 
 <!-- end of initial set up chunks -->
 

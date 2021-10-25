@@ -71,6 +71,9 @@ slugs <- list()
 <!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 
+```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
+```
+
 <!-- end of initial set up chunks -->
 
 Anything here is included in the summary.

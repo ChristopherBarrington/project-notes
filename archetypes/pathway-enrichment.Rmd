@@ -81,14 +81,15 @@ slugs <- list(deseq2='deseq2')
 <!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 
-[deseq2 post]: {{< ref "deseq2" >}}
-
 [clusterprofiler bioc]: https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html
 [clusterprofiler do]: http://yulab-smu.top/clusterProfiler-book/chapter4.html#enrichdo-function
 [clusterprofiler go]: http://yulab-smu.top/clusterProfiler-book/chapter5.html
 [clusterprofiler kegg]: http://yulab-smu.top/clusterProfiler-book/chapter6.html
 [fgsea]: http://bioconductor.org/packages/release/bioc/html/fgsea.html
 [msigdb collections]: http://www.gsea-msigdb.org/gsea/msigdb/collections.jsp
+
+```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
+```
 
 <!-- end of initial set up chunks -->
 

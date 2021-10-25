@@ -81,7 +81,9 @@ project <- read_dotbabs()
 
 <!-- define slugs for other reports here for ease and reuse -->
 ```{r define_slugs, opts.label='batch_chunk'}
-slugs <- list()
+list(`project data post`='create-project-data',
+     `project data post sample sheet`='create-project-data#read-and-parse-metadata',
+     `nfrnaseq post`='nfcore-rnaseq"') -> slugs
 ```
 
 <!-- define shortcut links -->
@@ -101,9 +103,8 @@ slugs <- list()
 [pheatmap cran]: https://cran.r-project.org/web/packages/pheatmap/index.html
 [tximport from rsem]: https://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html#RSEM
 
-[project data post]: {{< ref "create-project-data" >}}
-[project data post sample sheet]: {{< ref "create-project-data#read-and-parse-metadata" >}}
-[nfrnaseq post]: {{< ref "nfcore-rnaseq" >}}
+```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
+```
 
 <!-- end of initial set up chunks -->
 

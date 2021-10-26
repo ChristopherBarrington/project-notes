@@ -114,3 +114,6 @@ icon:
   pack:
     ai: true
 profile: false # author tag in footer
+textcite:
+  sep: "; "
+  last: ' and '

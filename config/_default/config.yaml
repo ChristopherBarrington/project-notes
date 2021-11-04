@@ -59,8 +59,6 @@ markup:
   goldmark:
     renderer:
       unsafe: true # `true` to include html from markdown (eg figures!)
-  highlight: # https://gohugo.io/content-management/syntax-highlighting/
-    style: friendly
   tableOfContents: # https://gohugo.io/getting-started/configuration-markup/#table-of-contents
     startLevel: 2
     endLevel: 5

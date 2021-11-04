@@ -50,7 +50,7 @@ address_format: en-gb
 
 ## syntax highlighting with HighlightJS
 ## https://wowchemy.com/docs/content/writing-markdown-latex/#code-highlighting
-highlight: true #
+highlight: true
 highlight_style: atom-one-light
 highlight_languages:
   - bash

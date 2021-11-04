@@ -51,7 +51,7 @@ address_format: en-gb
 ## syntax highlighting with HighlightJS
 ## https://wowchemy.com/docs/content/writing-markdown-latex/#code-highlighting
 highlight: true
-highlight_style: atom-one-light
+highlight_style: xcode
 highlight_languages:
   - bash
   - python

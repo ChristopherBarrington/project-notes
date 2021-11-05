@@ -59,19 +59,19 @@ c() -> bibliography_doi
 theme_set()
 ```
 
-<!-- any final things to set for this workbook -->
-```{r final_setup, opts.label='batch_chunk'}
-```
-
 <!-- define slugs for other reports here for ease and reuse -->
 ```{r define_slugs, opts.label='batch_chunk'}
 slugs <- list()
 ```
 
 <!-- define shortcut links -->
+```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
+```
+
 [CRICK]: https://www.crick.ac.uk
 
-```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
+<!-- any final things to set for this workbook -->
+```{r final_setup, opts.label='batch_chunk'}
 ```
 
 <!-- end of initial set up chunks -->

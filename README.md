@@ -43,8 +43,11 @@ __Note the lack of `.` in the name, it is interpreted as a file extension. Shoul
 
 ```bash
 TITLE=`ts get key=Scititle` hugo new --kind home home
-cd content/home
-renv_ln
+(cd content/home
+ renv_ln)
+```
+
+```bash
 Rscript -e 'knitr::knit("babs-information.Rmd")'
 Rscript -e 'knitr::knit("project-information.Rmd")'
 ```

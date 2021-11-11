@@ -49,7 +49,7 @@ TITLE=`ts get key=Scititle` hugo new --kind home home
 
 ```bash
 Rscript -e 'knitr::knit("babs-information.Rmd")'
-Rscript -e 'knitr::knit("project-information.Rmd")'
+Rscript -e 'knitr::knit("project-background.Rmd")'
 ```
 
 ## make new content

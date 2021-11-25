@@ -38,7 +38,7 @@ footnotereturnlinkcontents: <sup>^</sup>
 disableAliases: true
 timeout: 600000
 sectionPagesMenu: "main" # auto list in `main` navbar
-relativeURLS: true
+relativeURLS: false
 
 ignoreFiles: 
   - \.bibtex$

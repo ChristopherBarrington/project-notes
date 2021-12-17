@@ -61,7 +61,6 @@ markup:
     renderer:
       unsafe: true # `true` to include html from markdown (eg figures!)
   highlight:
-    style: xcode
   tableOfContents: # https://gohugo.io/getting-started/configuration-markup/#table-of-contents
     startLevel: 2
     endLevel: 5

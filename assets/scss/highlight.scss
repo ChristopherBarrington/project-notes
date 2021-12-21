@@ -1,0 +1,15 @@
+/* customisation for code blocks etc */
+
+/* code blocks */
+.hljs {
+  font-size: 0.8rem;
+}
+
+/* inline code  */
+code {
+}
+
+.dark .alert code, .alert code {
+  color: inherit;
+  background-color: inherit;
+}

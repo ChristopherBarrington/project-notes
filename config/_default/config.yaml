@@ -4,8 +4,12 @@
 # This file is formatted using YAML syntax - learn more at https://learnxinyminutes.com/docs/yaml/
 
 title: 'BABS project report' # Website name
-baseurl: '' # Website URL
-copyright: '' # Footer text, e.g. '© {year} Me'
+
+# baseurl: '' # Website URL
+relativeURLs: true
+canonifyURLs: false
+
+copyright: '© {year} Christopher Barrington' # Footer text, e.g. '© {year} Me'
 
 ############################
 ## LANGUAGE
@@ -38,7 +42,6 @@ footnotereturnlinkcontents: <sup>^</sup>
 disableAliases: true
 timeout: 600000
 sectionPagesMenu: "main" # auto list in `main` navbar
-relativeURLS: false
 
 ignoreFiles: 
   - \.bibtex$

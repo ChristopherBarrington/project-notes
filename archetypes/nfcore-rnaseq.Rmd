@@ -79,13 +79,14 @@ slugs <- list()
 
 <!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
-[NFCORE RNASEQ]: https://nf-co.re/rnaseq
+[NFCORE RNASEQ]: https://nf-co.re/rnaseq/`r software_versions['nf-core/rnaseq']`
+[PICARD]: https://broadinstitute.github.io/picard
 [RSEM]: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-323
 [STAR]: https://academic.oup.com/bioinformatics/article/29/1/15/272537
 
 <!-- end of initial set up chunks -->
 
-Here I will detail running the [nf-core/rnaseq (version `r software_versions['nf-core/rnaseq']`)][NFCORE RNASEQ] pipeline. The pipeline takes FastQ files as input, runs quality control checks on the data, trimming reads for low quality nucleotides, alignment of reads and quantification of aligned data. The pipeline provides BAM format maps and expression matrices. 
+Here I will detail running the [nf-core/rnaseq][NFCORE RNASEQ] (version `r software_versions['nf-core/rnaseq']`) pipeline. The pipeline takes FastQ files as input, runs quality control checks on the data, trimming reads for low quality nucleotides, alignment of reads and quantification of aligned data. The pipeline provides BAM format maps and expression matrices. 
 
 <!--more-->
 
@@ -167,14 +168,14 @@ data %>%
 
 plot_data %>% {
     ggplot(data=.) +
-    aes(x=donor_id:treatment, y=n) +
+    aes(x=colA:colB, y=n, group=Sample.limsid) +
     labs(x='Sample', y='Detected genes') +
-    geom_bar(stat='identity') +
+    geom_bar(stat='identity', position='dodge', colour='#4565AE', fill='#94CEF2', size=1) +
     scale_x_discrete() +
     scale_y_continuous(labels=comma) +
     theme(axis.text.x=element_text(angle=30, hjust=1, vjust=1),
           axis.title.x=element_blank())} %>%
-  resize_and_show(width=nrow(project_sample_sheet)/2.5, aspect=3)
+  resize_and_show(width=min(nrow(project_sample_sheet)*0.25, 9), height=1.75)
 ```
 
 ```{r show_detected_genes, echo=FALSE, dependson='plot_detected_genes'}

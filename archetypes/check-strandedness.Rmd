@@ -26,11 +26,11 @@ output:
 <!-- initial set up chunks are invisible -->
 
 <!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')), echo=FALSE}
 ```
 
 <!-- read the standard knitr setup script -->
-```{r knitr_setup, opts.label='batch_chunk', code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```{r knitr_setup, opts.label='batch_chunk', code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')), echo=FALSE}
 ```
 
 <!-- load any packages for the workbook -->
@@ -89,8 +89,7 @@ The strandedness of the RNA-seq library will be checked here using a sample of r
 First, we need to load the genome specification from the data repository. These values will be exported and used to align to the correct genome index.
 
 ```{r load_genome}
-system.file('docs/genome.yaml', package='datarepository') %>%
-  read_yaml() -> genome
+data(genome)
 ```
 
 ```{r show_genome, echo=FALSE}
@@ -119,6 +118,8 @@ length(fastq) %>%
          knit_exit(append='cannot determine pairedness', fully=TRUE)) -> pairedness
 ```
 
+This experiment's `pairedness` is: `r pairedness`.
+
 Now the variables can be exported ready to be used in the analysis.
 
 ```{r export_variables}
@@ -129,7 +130,8 @@ list(SPECIES=genome$species,
      GENOME_PATH=file.path('/camp/svc/reference/Genomics/babs', genome$species, genome$source, genome$version, str_c('release-', genome$release)),
      R1_FASTQ_FILE=fastq[1]) %>%
   when(pairedness=='single_end'~.,
-       pairedness=='paired_end'~append(., list(R2_FASTQ_FILE=fastq[2]))) %>%
+       pairedness=='paired_end'~append(., list(R2_FASTQ_FILE=fastq[2]))) %T>%
+  print() %>%
   do.call(what=Sys.setenv)
 ```
 

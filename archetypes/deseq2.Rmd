@@ -83,7 +83,7 @@ project <- read_dotbabs()
 ```{r define_slugs, opts.label='batch_chunk'}
 list(`project data post`='create-project-data',
      `project data post sample sheet`='create-project-data#read-and-parse-metadata',
-     `nfrnaseq post`='nfcore-rnaseq"') -> slugs
+     `nfrnaseq post`='nfcore-rnaseq') -> slugs
 ```
 
 <!-- define shortcut links -->
@@ -136,7 +136,7 @@ The `biomaRt` connection is loaded and the Ensembl ID and gene names downloaded,
 data(mart)
 additional_attributes <- c()
 
-getBM(mart=mart, attributes=c('ensembl_gene_id', 'external_gene_name', 'description', additional_attributes)) %>%
+getBM(mart=mart, attributes=c('ensembl_gene_id', 'external_gene_name', 'description', 'hgnc_symbol', 'entrezgene_id', additional_attributes)) %>%
   mutate(description=str_remove(description, ' \\[Source.*$')) %>%
   rename(gene_name=external_gene_name,
          gene_description=description,
@@ -378,8 +378,13 @@ dds[,dds$col1=='SOMETHING'] %>%
 
 In this section, a set of contrasts are defined from which differentially expressed genes will be identified. The format of contrasts is detailed in the [DESeq2 vignette][deseq2 vignette contrasts] and in this [DESeq2 workshop][deseq2 workshop].
 
-```{r get_comparisons_config}
+{{< callout "info" >}}
+The names of pairwise comparisons are specified as treatment vs control.
+{{< /callout >}}
+
+```{r get_comparisons_config, dependson='make_dds'}
 list(`contrast name`=list(dds=dds, design=~col1, contrast=c(group='col1', treated='treated', control='control')),
+     `contrast name`=list(dds=dds[,dds$col2=='foo', design=~col1, contrast=c(group='col1', treated='treated', control='control')),
      `LRT name`=list(dds=dds, design=~col1+col2, reduced=~col2)) %>%
   Map(x=., n=names(.), function(x, n) append(x, list(comparison=n))) -> comparisons_config
 ```
@@ -391,7 +396,7 @@ list(`contrast name`=list(dds=dds, design=~col1, contrast=c(group='col1', treate
 Now the contrasts defined above are used to calculate the results of differential expression. FDR thresholds (`alpha`) ranges are independently assessed due to the [independent filtering][deseq2 vignette ind filt] applied by DESeq2.
 
 {{< callout "note" >}}
-A zero count in the `baseMean` shows that the gene was not detected in any sample. A missing value in the `pvalue` column shows the gene count in a sample was classified as an outlier. A missing value in the `padj` column indicates the gene failed independent filtering at the specified FDR (`alpha`) threshold. See the [DESeq2 vignette](https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#pvaluesna) for further information.
+A zero count in the `baseMean` shows that the gene was not detected in any sample. A missing value in the `pvalue` column shows the gene count in a sample was classified as an outlier. A missing value in the `padj` column indicates the gene failed independent filtering at the specified FDR (`alpha`) threshold. See the [DESeq2 vignette][deseq2 vignette na results] for further information.
 {{< /callout >}}
 
 First, a function is defined that can run DESeq2 for all comparisons in the above list. It can be submitted to the cluster via `rslurm` or run locally if needed. The following function:
@@ -1036,7 +1041,7 @@ min_de_features <- 100
 all_dds %>%
   llply(function(x) x %>% when(metadata(.)$results$outcome %>% str_detect('\\*') %>% sum() %>% is_less_than(min_de_features)~'skip', TRUE~.)) %>%
   discard(function(x) class(x) != 'DESeqDataSet') %>%
-  llply(.parallel=TRUE, make_de_features_heatmap, annotations=c('treatment', 'donor_id')) -> plots_list
+  llply(.parallel=TRUE, make_de_features_heatmap, annotations=c('col1', 'col2', 'col3')) -> plots_list
 ```
 
 Heatmaps are plotted here for comparisons with at least `r min_de_features` significant feature(s).
@@ -1164,32 +1169,39 @@ all_dds %>%
   llply(.parallel=TRUE, function(dds) {
     colData(dds) %>%
       as.data.frame() %>%
-      mutate(Sample.Name=str_c(col1, col2, sep='.')) %>%
+      mutate(Sample.Name=str_c(genotype, culture, sep='.')) %>%
       select(Sample.limsid, Sample.Name) %>%
       deframe() -> lims2sample
+
+    # collect data from dds to join together by `ensembl_gene_id`
+    data_to_join <- list()
 
     dds %>%
       counts(norm=TRUE) %>%
       as.data.frame() %>%
       set_names(function(x) lims2sample[x]) %>%
-      rownames_to_column('ensembl_gene_id') -> norm_counts
+      rownames_to_column('ensembl_gene_id') -> data_to_join$norm_counts
 
+    dds %>%
+      metadata() %>%
+      pluck('gene_information') -> data_to_join$gene_information
+
+    # dds %>%
+    #   metadata() %>%
+    #   pluck('pathway_information') -> data_to_join$pathway_information
+
+    # join all of the tables together
     dds %>%
       metadata() %>%
       pluck('results') %>%
-      as.data.frame() -> results
-
-    dds %>%
-      metadata() %>%
-      pluck('gene_information') -> gene_information
-
-    results %>%
-      left_join(y=gene_information) %>%
-      left_join(y=norm_counts) %>%
-      return()}) %T>%
+      as.data.frame() %>%
+      list(.) %>%
+      append(values=data_to_join) %>%
+      Reduce(f=function(x, y) left_join(x=x, y=y, by='ensembl_gene_id')) %>%
+      invisible()}) %T>%
   write.xlsx(file='files/all_results.xlsx') %>%
   lapply(filter, str_detect(outcome, '\\*')) %>%
-  write.xlsx(file='files/dds_results.xlsx')
+  write.xlsx(file='files/differentially_expressed_results.xlsx')
 ```
 
 <!--  -->

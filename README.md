@@ -34,6 +34,10 @@ pip3 install academic
 ### make an author
 
 ```bash
+hugo new --kind authors authors
+```
+
+```bash
 hugo new --kind author authors/christopher-barrington
 ```
 

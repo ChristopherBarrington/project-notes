@@ -25,7 +25,7 @@ git clone && mkdir content
 ## conda setup
 
 ```bash
-conda create # etc
+conda create --no-default-packages # etc
 # copy hugo binary
 conda install python=3.9.7
 pip3 install academic

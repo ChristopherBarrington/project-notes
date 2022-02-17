@@ -107,7 +107,7 @@ Anything here is included in the summary.
 
 <!-- include a session information section -->
 ```{r show_session_information}
-#| child=system.file('chunks/session_information.Rmd', package='project.notes.tools')},
+#| child=system.file('chunks/session_information.Rmd', package='project.notes.tools'),
 #| opts.label='batch_chunk',
 #| saved_objects <- c()
 ```

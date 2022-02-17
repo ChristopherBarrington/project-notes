@@ -51,6 +51,7 @@ output:
 <!-- set a ggplot theme to use as a base in the workbook -->
 ```{r define_global_ggplot_theme}
 #| opts.label='batch_chunk'
+
 (theme_bw() +
  theme(text=element_text(size=10, colour='black'),
        panel.grid.minor=element_blank(),

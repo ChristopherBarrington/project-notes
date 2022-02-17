@@ -25,7 +25,7 @@ git clone && mkdir content
 ## conda setup
 
 ```bash
-conda create # etc
+conda create --no-default-packages # etc
 # copy hugo binary
 conda install python=3.9.7
 pip3 install academic
@@ -34,7 +34,11 @@ pip3 install academic
 ### make an author
 
 ```bash
-hugo new --kind author authors/christopher-barrington
+hugo new --kind authors authors
+```
+
+```bash
+GITHUB=ChristopherBarrington ORCID=0000-0003-1281-2658 LIMSID=`ts get key=Lims` hugo new --kind author authors/christopher-barrington
 ```
 
 __Note the lack of `.` in the name, it is interpreted as a file extension. Should be the first part of our crick email.__

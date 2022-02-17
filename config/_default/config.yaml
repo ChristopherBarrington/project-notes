@@ -6,7 +6,7 @@
 title: 'BABS project report' # Website name
 
 # baseurl: '' # Website URL
-relativeURLs: true
+relativeURLs: false # setting true breaks many things
 canonifyURLs: false
 
 copyright: '© {year} Christopher Barrington' # Footer text, e.g. '© {year} Me'

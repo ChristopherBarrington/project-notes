@@ -26,34 +26,34 @@ output:
 <!-- initial set up chunks are invisible -->
 
 <!-- read the standard knitr setup script -->
-```{r knitr_setup, echo=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```{r knitr_setup}
+#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
+#| echo=FALSE
 ```
 
 <!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```{bash setup_wd}
+#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- load any packages for the workbook -->
-```{r load_workbook_packages, opts.label='batch_chunk'}
+```{r load_workbook_packages}
+#| opts.label='batch_chunk'
 library(urltools)
 library(yaml)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
-```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
-```
-
-<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
-```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c() -> bibliography_doi
-```
-
-<!-- write a bibliography -->
-```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```{r configure_r}
+#| code=readLines(system.file('chunks/environment.r', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- set a ggplot theme to use as a base in the workbook -->
-```{r define_global_ggplot_theme, opts.label='batch_chunk'}
+```{r define_global_ggplot_theme}
+#| opts.label='batch_chunk'
+
 (theme_bw() +
  theme(text=element_text(size=10, colour='black'),
        panel.grid.minor=element_blank(),
@@ -62,16 +62,18 @@ theme_set()
 ```
 
 <!-- any final things to set for this workbook -->
-```{r final_setup, opts.label='batch_chunk'}
+```{r final_setup}
+#| opts.label='batch_chunk'
+
 opts_chunk$set(cache=FALSE)
 ```
 
-<!-- define slugs for other reports here for ease and reuse -->
-```{r define_slugs, opts.label='batch_chunk'}
-slugs <- list()
+<!-- define shortcut links to other reports here for ease and reuse -->
+```{r write_slugs}
+#| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
+#| slugs=list()
 ```
 
-<!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 
 <!-- end of initial set up chunks -->
@@ -207,7 +209,10 @@ save(complete_sample_sheet, project_sample_sheet)
 The `complete_sample_sheet` contains the LIMS identifier and all sample metadata that is available. The `project_sample_sheet` is a subset of `complete_sample_sheet`
 {{< /callout >}}
 
-```{r text_n_rows_project_sample_sheet, echo=FALSE, results='asis'}
+```{r text_n_rows_project_sample_sheet}
+#| echo=FALSE,
+#| results='asis'
+
 project_sample_sheet %>%
   nrow() %>%
   when(.>10~comma(.) %>% sprintf(fmt='The first 10 (of %s) rows of the `project_sample_sheet` are shown below.'),
@@ -215,25 +220,22 @@ project_sample_sheet %>%
   cat()
 ```
 
-```{r show_project_sample_sheet, echo=FALSE}
+```{r show_project_sample_sheet}
+#| echo=FALSE}
+
 head(project_sample_sheet, n=10) %>%
   kable(format=if_else(interactive(), 'markdown', 'html'))
 ```
 
-<!-- include a references section -->
-
-```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+<!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r write_bibliography}
+#| bibliography_doi=c(),
+#| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 
 <!-- include a session information section -->
-
-```{r record_saved_objects, opts.label='batch_chunk'}
-#! names of object to be included in the table of hashes
-saved_objects <- c('genome', 'mart', 'complete_sample_sheet', 'project_sample_sheet')
+```{r show_session_information}
+#| child=system.file('children/session_information.Rmd', package='project.notes.tools'),
+#| opts.label='batch_chunk',
+#| saved_objects <- c()
 ```
-
-```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
-```
-
-<!-- end of session information -->
-

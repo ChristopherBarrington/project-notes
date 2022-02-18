@@ -26,15 +26,20 @@ output:
 <!-- initial set up chunks are invisible -->
 
 <!-- read the standard knitr setup script -->
-```{r knitr_setup, echo=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```{r knitr_setup}
+#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
+#| echo=FALSE
 ```
 
 <!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```{bash setup_wd}
+#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- load any packages for the workbook -->
-```{r load_workbook_packages, opts.label='batch_chunk'}
+```{r load_workbook_packages}
+#| opts.label='batch_chunk'
 library(DOSE)
 library(clusterProfiler)
 library(fgsea)
@@ -43,25 +48,15 @@ library(DESeq2)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
-```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
-```
-
-<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
-```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c(clusterprofiler_4='10.1016/j.xinn.2021.100141',
-  clusterprofiler='10.1089/omi.2011.0118',
-  dose='10.1093/bioinformatics/btu684',
-  fgsea='10.1101/060012',
-  msigdb='10.1073/pnas.0506580102',
-  msigdb_hallmark='10.1016/j.cels.2015.12.004') -> bibliography_doi
-```
-
-<!-- write a bibliography -->
-```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```{r configure_r}
+#| code=readLines(system.file('chunks/environment.r', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- set a ggplot theme to use as a base in the workbook -->
-```{r define_global_ggplot_theme, opts.label='batch_chunk'}
+```{r define_global_ggplot_theme}
+#| opts.label='batch_chunk'
+
 (theme_bw() +
  theme(text=element_text(size=10, colour='black'),
        panel.grid.minor=element_blank(),
@@ -70,15 +65,16 @@ theme_set()
 ```
 
 <!-- any final things to set for this workbook -->
-```{r final_setup, opts.label='batch_chunk'}
+```{r final_setup}
+#| opts.label='batch_chunk'
 ```
 
-<!-- define slugs for other reports here for ease and reuse -->
-```{r define_slugs, opts.label='batch_chunk'}
-slugs <- list(deseq2='deseq2')
+<!-- define shortcut links to other reports here for ease and reuse -->
+```{r write_slugs}
+#| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
+#| slugs=list(deseq2='deseq2')
 ```
 
-<!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 
 [clusterprofiler bioc]: https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html
@@ -87,9 +83,6 @@ slugs <- list(deseq2='deseq2')
 [clusterprofiler kegg]: http://yulab-smu.top/clusterProfiler-book/chapter6.html
 [fgsea]: http://bioconductor.org/packages/release/bioc/html/fgsea.html
 [msigdb collections]: http://www.gsea-msigdb.org/gsea/msigdb/collections.jsp
-
-```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
-```
 
 <!-- end of initial set up chunks -->
 
@@ -137,7 +130,10 @@ ldply(all_dds, .id='comparison', .parallel=TRUE, function(dds)
 
 The number of differentially expressed genes considered for each comparison is shown below:
 
-```{r show_number_of_de_genes_considered, dependson='load_deseq2_results', echo=FALSE}
+```{r show_number_of_de_genes_considered}
+#| dependson='load_deseq2_results',
+#| echo=FALSE
+
 #! summary table of number of de genes
 significant_results %>%
   group_by(comparison, outcome) %>%
@@ -150,7 +146,9 @@ significant_results %>%
 
 The universe of genes is defined below. (In most cases all universes will be the same in a project...)
 
-```{r define_universe, dependson='load_deseq2_results'}
+```{r define_universe}
+#| dependson='load_deseq2_results'
+
 llply(all_dds, .parallel=TRUE, function(dds)
   mcols(dds) %>%
     as.data.frame() %>%
@@ -163,19 +161,17 @@ In total `r length(universe) %>% comma()` genes were identified in one or more d
 
 The `significant_results` are reformatted here to make a list of comparison and direction of change (and an additional 'changed' direction).
 
-```{r get_gene_lists, dependson='load_deseq2_results'}
+```{r get_gene_lists}
+#| dependson='load_deseq2_results'
+
 significant_results %>%
   rbind(mutate(significant_results, outcome='changed')) %>%
   dlply(~comparison+outcome, pluck, 'ensembl_gene_id') -> de_genes
 ```
 
-<!--  -->
-
 ## `clusterProfiler`
 
 The [`clusterProfiler`][clusterprofiler bioc] package will be used to test for enrichment of gene ontology terms, KEGG pathways and disease ontology (DO) terms. The following sections create functions to run the tests.
-
-<!--  -->
 
 ### Create an identifier conversion vector
 
@@ -244,7 +240,9 @@ The enrichment tests are run in parallel using using `rslurm` to distribute each
 
 This function is run on a node in a new R session. It will pick the list of genes and run one of the enrichment tests, returning an `enrichResult` object in a list named as the ID of the function's parameter set.
 
-```{r function_to_run_on_slurm, dependson='define_enrichment_test_functions'}
+```{r function_to_run_on_slurm}
+#| dependson='define_enrichment_test_functions'
+
 run_on_slurm <- function(gene_set, enrichment_function, cutoff, ontology_type, id) {
   message('--------------------------------------------------')
   system('hostname')
@@ -272,7 +270,9 @@ run_on_slurm <- function(gene_set, enrichment_function, cutoff, ontology_type, i
 
 Each combination of test parameters is produced by `crossing()` the different parameter values that will be passed to the previously defined test functions. The 'gene_set' variable dictates which genes are tested. The parameter combinations (rows) are shuffled so that the computational cost of analyses are randomly distributed among nodes.
 
-```{r define_enrichment_test_parameters, dependson='get_gene_lists'}
+```{r define_enrichment_test_parameters}
+#| dependson='get_gene_lists'
+
 crossing(gene_set=names(de_genes),
          enrichment_function=c('test_GO_enrichment', 'test_KEGG_pathway_enrichment', 'test_DO_enrichment'),
          cutoff=0.01) %>%
@@ -289,7 +289,10 @@ crossing(gene_set=names(de_genes),
 
 Using the above functions and parameters, the computation is distributed across CAMP. The Slurm job array is submitted (see note) and the results loaded once the job has finished.
 
-```{r run_enrichment_tests, dependson=c('get_ensembl_id_conversions', 'function_to_run_on_slurm', 'define_enrichment_test_parameters'), results='hide'}
+```{r run_enrichment_tests}
+#| dependson=c('get_ensembl_id_conversions', 'function_to_run_on_slurm', 'define_enrichment_test_parameters'),
+#| results='hide'
+
 slurm_apply(f=run_on_slurm,
             params=enrichment_test_parameters,
             jobname='run_enrichment_tests',
@@ -304,7 +307,10 @@ slurm_apply(f=run_on_slurm,
 
 The Slurm job was:
 
-```{r show_slurm_job, cache=FALSE, echo=FALSE}
+```{r show_slurm_job}
+#| cache=FALSE,
+#| echo=FALSE
+
 if(file.exists('scratch/slr_job.run_enrichment_tests.rds')) {
   readRDS('scratch/slr_job.run_enrichment_tests.rds') %>%
     {.[c('jobname', 'jobid', 'nodes')]} %>%
@@ -321,7 +327,9 @@ if(file.exists('scratch/slr_job.run_enrichment_tests.rds')) {
 
 The results of the tests are loaded into the `enrichment_results` `data.frame` and saved into the data repository. `xlsx` workbooks for each test with worksheets for each gene set [can be downloaded](files/enrichment_results.zip). These results are significant with the 1% `pvalue` (and `qvalue`) cutoff. I have applied the `clusterProfiler::simplify` function to try and make the results simpler to interpret.
 
-```{r load_enrichment_test_results, dependson='run_enrichment_tests'}
+```{r load_enrichment_test_results}
+#| dependson='run_enrichment_tests'
+
 readRDS('scratch/slr_job.run_enrichment_tests.rds') %>%
   get_slurm_out(outtype='raw', ncores=ncores, wait=TRUE) %>%
   unname() %>%
@@ -336,7 +344,11 @@ enrichResult_objects %>%
   select(-id) -> enrichment_results
 ```
 
-```{r save_enrichment_results, dependson='load_enrichment_test_results', echo=FALSE, results='hide'}
+```{r save_enrichment_results}
+#| dependson='load_enrichment_test_results',
+#| echo=FALSE,
+#| results='hide'
+
 save(enrichResult_objects)
 save(enrichment_results)
 
@@ -356,7 +368,11 @@ system(command='cd scratch && zip - enrichment_results/*xlsx > ../files/enrichme
 A summary of the number of enriched terms in each test, comparison and gene set is shown in the following table:
 
 {{< tabs "show_enrichment_test_results_summary_tables" >}}
-```{r show_enrichment_test_results_summary_tables, dependson='load_enrichment_test_results', echo=FALSE, results='asis'}
+```{r show_enrichment_test_results_summary_tables}
+#| dependson='load_enrichment_test_results',
+#| echo=FALSE,
+#| results='asis'
+
 enrichment_results %>%
   group_by(enrichment_function, gene_set) %>%
   tally() %>%
@@ -373,7 +389,10 @@ for(i in names(tables_list)) {
 
 In the following excerpt table, the top 5 enriched terms ranked by adjusted p-value are shown for each contrast/direction combination. RNA-seq changes that were not direction-filtered (the 'changed' set) are not shown in the table but are included in [the Excel workbooks](files/enrichment_results.zip).
 
-```{r enrichment_test_results_excerpt_table, dependson='load_enrichment_test_results', echo=FALSE}
+```{r enrichment_test_results_excerpt_table}
+#| dependson='load_enrichment_test_results',
+#| echo=FALSE
+
 enrichment_results %>%
   arrange(p.adjust) %>%
   filter(str_detect(gene_set, '\\.changed$')) %>%
@@ -396,7 +415,9 @@ In the plots below, some pathways were selected. They show the gene set (any gen
 
 First, the gene sets for database version 7.4 are sought from disk, and the genes in the pathway set loaded using `gmtPathway()` ready to be be used in `fgsea()` and later plotting. Pathway sets from the available collection are selected here ([others can be downloaded][msigdb collections]).
 
-```{r show_available_msigdb_gene_sets, echo=FALSE}
+```{r show_available_msigdb_gene_sets}
+#| echo=FALSE
+
 file.path('/camp/stp/babs/working/barrinc', 'db', 'msigdb') %>%
   list.files(path=., pattern='v7.4.symbols.gmt') %>%
   data.frame(`gene set`=.) %>%
@@ -418,7 +439,9 @@ file.path('/camp/stp/babs/working/barrinc', 'db', 'msigdb') %>%
 
 The genes in each comparison are now ranked by their `stat` value; this is calculated by DESeq2 and is the Wald statistic. (The [comparisons were filtered above](#load-differentially-expressed-genes) to remove LRT-based comparisons). The genes at the extremes of these vectors are likely to be differentially expressed, but there is no filtering here for significance.
 
-```{r get_ranked_results, dependson='load_deseq2_results'}
+```{r get_ranked_results}
+#| dependson='load_deseq2_results'
+
 ldply(all_dds, .id='comparison', .parallel=TRUE, function(dds)
   dds %>% 
     metadata() %>%
@@ -434,7 +457,10 @@ ldply(all_dds, .id='comparison', .parallel=TRUE, function(dds)
 
 The `ranked_results` is a list of comparison results, each of which is a named vector of genes and their `stat`. An excerpt is shown below.
 
-```{r show_ranked_significant_results, dependson='get_ranked_results', echo=FALSE}
+```{r show_ranked_significant_results}
+#| dependson='get_ranked_results',
+#| echo=FALSE
+
 ranked_results %>%
   head(n=3) %>%
   lapply(headtail, n=5)
@@ -442,14 +468,21 @@ ranked_results %>%
 
 GSEA is now run using `fgsea` for every pathway set and comparison combination in a nested list in parallel. A [zip file of Excel workbooks](files/fgsea_results.xlsx.zip) is created that contains a workbook for each pathway set, each of which contains a worksheet for each comparison. 
 
-```{r run_fgsea, dependson=c('get_msigdb_gene_sets','get_ranked_results'), out.width='50%', results='asis'}
+```{r run_fgsea}
+#| dependson=c('get_msigdb_gene_sets','get_ranked_results'),
+#| out.width='50%',
+#| results='asis'
+
 llply(msigdb_pathway_sets, .parallel=TRUE, function(msigdb_pathway_set)
   llply(ranked_results, .parallel=TRUE, function(ranked_result)
     fgsea(pathways=msigdb_pathway_set, stats=ranked_result, nperm=5000, nproc=4))) %>%
   map_depth(.depth=2, arrange, padj, desc(size), pathway) -> fgsea_results
 ```
 
-```{r write_fgsea_results_excel_workbooks, dependson='run_fgsea', echo=FALSE}
+```{r write_fgsea_results_excel_workbooks}
+#| dependson='run_fgsea',
+#| echo=FALSE
+
 dir.create(path='scratch/fgsea_results', recursive=TRUE, showWarnings=FALSE)
 system(command='rm -r scratch/fgsea_results/*')
 
@@ -471,7 +504,13 @@ First, a summary plot of the top pathways for up- or down-regulated (not necessa
 This needs some/extensive prettification.
 {{< /callout >}}
 
-```{r show_fgsea_pathways_table_plots, dependson='run_fgsea', fig.width=8.5, fig.height=6, echo=FALSE, results='asis'}
+```{r show_fgsea_pathways_table_plots}
+#| dependson='run_fgsea',
+#| echo=FALSE,
+#| fig.width=8.5,
+#| fig.height=6,
+#| results='asis'
+
 cat('{{< tabs "show_fgsea_pathways_table_plots" >}}')
 
 for(msigdb_pathway_set in names(fgsea_results)) {
@@ -509,7 +548,9 @@ cat('{{< /tabs >}}')
 
 Enrichment plots for the top 6 most extreme ES results are shown below. A [zip file of enrichment plots](files/output_fgsea_enrichment_plots.zip) for every pathway set and comparison combination is made because there are too many plots to include here.
 
-```{r get_fgsea_enrichment_plots, dependson='run_fgsea'}
+```{r get_fgsea_enrichment_plots}
+#| dependson='run_fgsea'
+
 fgsea_results %>%
   Map(pathway_set=names(.), fgsea_results=., function(fgsea_results, pathway_set) {
     fgsea_results %>%
@@ -525,7 +566,11 @@ fgsea_results %>%
               labs(x='Ranked genes', y='Enrichment score'))})}) -> plots_list
 ```
 
-```{r output_fgsea_enrichment_plots, dependson='get_fgsea_enrichment_plots', results='hide', echo=FALSE}
+```{r output_fgsea_enrichment_plots}
+#| dependson='get_fgsea_enrichment_plots',
+#| echo=FALSE,
+#| results='hide'
+
 file.path('scratch', 'output_fgsea_enrichment_plots') %>%
   when(dir.exists(.)~sprintf(fmt='rm -r %s', .),
        TRUE~'sleep 0') %>%
@@ -547,7 +592,11 @@ Map(pathway_set=names(plots_list), plots_list=plots_list, function(plots_list, p
 system(command='cd scratch && zip -r - output_fgsea_enrichment_plots > ../files/output_fgsea_enrichment_plots.zip')
 ```
 
-```{r show_fgsea_enrichment_plots, dependson='get_fgsea_enrichment_plots', echo=FALSE, results='asis'}
+```{r show_fgsea_enrichment_plots}
+#| dependson='get_fgsea_enrichment_plots',
+#| echo=FALSE,
+#| results='asis'
+
 cat('{{< tabs "show_fgsea_enrichment_plots" >}}')
 
 for(msigdb_pathway_set in {plots_list %>% names()}) {
@@ -586,19 +635,20 @@ cat('{{< /tabs >}}')
 
 > Enrichment of gene function was assessed in R (`r R.version[c('major','minor')] %>% unlist() %>% str_c(collapse='.')`) using clusterProfiler (`r packageVersion('clusterProfiler')`, {{< textcite "Wu-2021" >}}, {{< textcite "Yu-2012" >}}) to query the Gene Ontology, KEGG and DOSE ({{< textcite "Yu-2014" >}}) databases. The fgsea (`r packageVersion('fgsea')`) R package was used for gene set enrichment analysis using all detected genes ranked by the stat variable of the DESeq2 results and pathway sets defined by MSigDB ({{< textcite "Subramanian-2005" >}}, {{< textcite "Liberzon-2015" >}}). 
 
-<!-- include a references section -->
-
-```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+<!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r write_bibliography}
+#| bibliography_doi=c(clusterprofiler_4='10.1016/j.xinn.2021.100141',
+#|                    clusterprofiler='10.1089/omi.2011.0118',
+#|                    dose='10.1093/bioinformatics/btu684',
+#|                    fgsea='10.1101/060012',
+#|                    msigdb='10.1073/pnas.0506580102',
+#|                    msigdb_hallmark='10.1016/j.cels.2015.12.004'),
+#| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 
 <!-- include a session information section -->
-
-```{r record_saved_objects, opts.label='batch_chunk'}
-#! names of object to be included in the table of hashes
-saved_objects <- c('enrichResult_objects', 'enrichment_results')
+```{r show_session_information}
+#| child=system.file('children/session_information.Rmd', package='project.notes.tools'),
+#| opts.label='batch_chunk',
+#| saved_objects <- c('enrichResult_objects', 'enrichment_results')
 ```
-
-```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
-```
-
-<!-- end of session information -->

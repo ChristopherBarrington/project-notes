@@ -25,16 +25,16 @@ output:
 
 <!-- initial set up chunks are invisible -->
 
-<!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd}
-#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
-#| opts.label='batch_chunk'
-```
-
 <!-- read the standard knitr setup script -->
 ```{r knitr_setup}
 #| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
 #| echo=FALSE
+```
+
+<!-- make subdirectories to write into/any bash work -->
+```{bash setup_wd}
+#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- load any packages for the workbook -->

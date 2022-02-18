@@ -59,6 +59,11 @@ output:
 theme_set()
 ```
 
+<!-- any final things to set for this workbook -->
+```{r final_setup}
+#| opts.label='batch_chunk'
+```
+
 <!-- define shortcut links to other reports here for ease and reuse -->
 ```{r write_slugs}
 #| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
@@ -66,11 +71,6 @@ theme_set()
 ```
 
 [CRICK]: https://www.crick.ac.uk
-
-<!-- any final things to set for this workbook -->
-```{r final_setup}
-#| opts.label='batch_chunk'
-```
 
 <!-- end of initial set up chunks -->
 

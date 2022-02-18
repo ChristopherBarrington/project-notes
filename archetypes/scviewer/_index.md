@@ -13,6 +13,6 @@ date: {{ now.Format "2006-01-02" }}
 created: {{ now.Format "2006-01-02" }}
 ---
 
-<!-- TITLE='SCViewer' WEIGHT=99 hugo new --kind scviewer scviewer  -->
+<!-- TITLE='SCViewer' WEIGHT=99 hugo new --kind scviewer scviewer-shinyapp  -->
 
-<!-- loads the app from static/{{ .File.Path | path.Dir | path.Base }} directory -->
+<!-- redirects to equivalent URL on the Shiny server -->

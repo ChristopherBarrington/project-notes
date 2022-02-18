@@ -25,18 +25,17 @@ output:
 
 <!-- initial set up chunks are invisible -->
 
-<!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd}
-#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
-#| opts.label='batch_chunk'
-```
-
 <!-- read the standard knitr setup script -->
 ```{r knitr_setup}
 #| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
 #| echo=FALSE
 ```
 
+<!-- make subdirectories to write into/any bash work -->
+```{bash setup_wd}
+#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| opts.label='batch_chunk'
+```
 
 <!-- load any packages for the workbook -->
 ```{r load_workbook_packages}
@@ -149,14 +148,14 @@ With the above arguments, the strandedness can be determined using [RSeQC][RSEQC
 The first 1 million records of the FastQ file(s) are extracted and saved to new files. This could be done any way, but because the records are in a random order taking the first records should be fine.
 
 ```{bash subsample_fastq_single}
-#| echo=pairedness=='single_end'
+#| echo=pairedness=='single_end',
 #| eval=pairedness=='single_end' & !result_exists
 
 gunzip --to-stdout ${R1_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R1.fastq
 ```
 
 ```{bash subsample_fastq_paired}
-#| echo=pairedness=='paired_end'
+#| echo=pairedness=='paired_end',
 #| eval=pairedness=='paired_end' & !result_exists
 
 gunzip --to-stdout ${R1_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R1.fastq
@@ -168,7 +167,7 @@ gunzip --to-stdout ${R2_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R
 [STAR][STAR] is used to align the subsampled data to the genome. The version of [STAR][STAR] used here is hard-coded and is `2.5.2a`.
 
 ```{bash run_star_single}
-#| echo=pairedness=='single_end'
+#| echo=pairedness=='single_end',
 #| eval=pairedness=='single_end' & !result_exists
 
 module load STAR/2.5.2a-foss-2016b

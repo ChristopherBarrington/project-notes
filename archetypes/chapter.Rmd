@@ -25,16 +25,16 @@ output:
 
 <!-- initial set up chunks are invisible -->
 
-<!-- read the standard knitr setup script -->
-```{r knitr_setup}
-#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
-#| echo=FALSE
-```
-
 <!-- make subdirectories to write into/any bash work -->
 ```{bash setup_wd}
 #| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
 #| opts.label='batch_chunk'
+```
+
+<!-- read the standard knitr setup script -->
+```{r knitr_setup}
+#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
+#| echo=FALSE
 ```
 
 <!-- load any packages for the workbook -->
@@ -59,6 +59,11 @@ output:
 theme_set()
 ```
 
+<!-- any final things to set for this workbook -->
+```{r final_setup}
+#| opts.label='batch_chunk'
+```
+
 <!-- define shortcut links to other reports here for ease and reuse -->
 ```{r write_slugs}
 #| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
@@ -66,11 +71,6 @@ theme_set()
 ```
 
 [CRICK]: https://www.crick.ac.uk
-
-<!-- any final things to set for this workbook -->
-```{r final_setup}
-#| opts.label='batch_chunk'
-```
 
 <!-- end of initial set up chunks -->
 

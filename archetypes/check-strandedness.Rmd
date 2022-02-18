@@ -95,7 +95,9 @@ First, we need to load the genome specification from the data repository. These 
 data(genome)
 ```
 
-```{r show_genome, echo=FALSE}
+```{r show_genome}
+#| echo=FALSE
+
 genome %>%
   enframe(name='', value='') %>%
   kableExtra::kable(format=if_else(interactive(), 'markdown', 'html'))
@@ -146,11 +148,17 @@ With the above arguments, the strandedness can be determined using [RSeQC][RSEQC
 
 The first 1 million records of the FastQ file(s) are extracted and saved to new files. This could be done any way, but because the records are in a random order taking the first records should be fine.
 
-```{bash subsample_fastq_single, eval=pairedness=='single_end' & !result_exists, echo=pairedness=='single_end'}
+```{bash subsample_fastq_single}
+#| echo=pairedness=='single_end'
+#| eval=pairedness=='single_end' & !result_exists
+
 gunzip --to-stdout ${R1_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R1.fastq
 ```
 
-```{bash subsample_fastq_paired, eval=pairedness=='paired_end' & !result_exists, echo=pairedness=='paired_end'}
+```{bash subsample_fastq_paired}
+#| echo=pairedness=='paired_end'
+#| eval=pairedness=='paired_end' & !result_exists
+
 gunzip --to-stdout ${R1_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R1.fastq
 gunzip --to-stdout ${R2_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R2.fastq
 ```
@@ -159,7 +167,10 @@ gunzip --to-stdout ${R2_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R
 
 [STAR][STAR] is used to align the subsampled data to the genome. The version of [STAR][STAR] used here is hard-coded and is `2.5.2a`.
 
-```{bash run_star_single, eval=pairedness=='single_end' & !result_exists, echo=pairedness=='single_end'}
+```{bash run_star_single}
+#| echo=pairedness=='single_end'
+#| eval=pairedness=='single_end' & !result_exists
+
 module load STAR/2.5.2a-foss-2016b
 
 STAR \
@@ -222,7 +233,9 @@ infer_experiment.py \
 
 The output of `infer_experiment.py` is shown below:
 
-```{r show_results, echo=FALSE}
+```{r show_results}
+#| echo=FALSE
+
 readLines('files/infer_experiment.result.txt') %>%
   str_subset('^$', negate=TRUE) %>%
   str_c('\n') %>%
@@ -234,7 +247,9 @@ For each pair of symbols (`++` for example), the symbols show the orientation of
 1. The proportion of reads in either class
 2. The orientation of the read to the transcript
 
-```{r reformat_results, echo=FALSE}
+```{r reformat_results}
+#| echo=FALSE
+
 readLines('files/infer_experiment.result.txt') %>%
   str_subset(':') %>%
   str_remove_all('"') %>%
@@ -253,7 +268,9 @@ readLines('files/infer_experiment.result.txt') %>%
   kable(x=select(., -proportion), format=if_else(interactive(), 'markdown', 'html')) -> results
 ```
 
-```{r get_conclusion, echo=FALSE}
+```{r get_conclusion}
+#| echo=FALSE
+
 results %>%
   arrange(proportion) %>%
   tail(n=1) %>%

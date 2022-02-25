@@ -280,5 +280,5 @@ This needs to be adapted for paired-end datasets!
 ```{r show_session_information}
 #| child=system.file('children/session_information.Rmd', package='project.notes.tools'),
 #| opts.label='batch_chunk',
-#| saved_objects <- c()
+#| saved_objects=c()
 ```

@@ -25,35 +25,35 @@ output:
 
 <!-- initial set up chunks are invisible -->
 
-<!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')), echo=FALSE}
+<!-- read the standard knitr setup script -->
+```{r knitr_setup}
+#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
+#| echo=FALSE
 ```
 
-<!-- read the standard knitr setup script -->
-```{r knitr_setup, opts.label='batch_chunk', code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')), echo=FALSE}
+<!-- make subdirectories to write into/any bash work -->
+```{bash setup_wd}
+#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- load any packages for the workbook -->
-```{r load_workbook_packages, opts.label='batch_chunk'}
+```{r load_workbook_packages}
+#| opts.label='batch_chunk'
+
 library(yaml)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
-```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
-```
-
-<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
-```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c(RSeQC='10.1093/bioinformatics/bts356',
-  STAR='10.1093/bioinformatics/bts635') -> bibliography_doi
-```
-
-<!-- write a bibliography -->
-```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```{r configure_r}
+#| code=readLines(system.file('chunks/environment.r', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- set a ggplot theme to use as a base in the workbook -->
-```{r define_global_ggplot_theme, opts.label='batch_chunk'}
+```{r define_global_ggplot_theme}
+#| opts.label='batch_chunk'
+
 (theme_bw() +
  theme(text=element_text(size=10, colour='black'),
        panel.grid.minor=element_blank(),
@@ -62,17 +62,19 @@ theme_set()
 ```
 
 <!-- any final things to set for this workbook -->
-```{r final_setup, opts.label='batch_chunk'}
+```{r final_setup}
+#| opts.label='batch_chunk'
+
 opts_chunk$set(cache=FALSE)
 result_exists <- file.exists('files/infer_experiment.result.txt')
 ```
 
 <!-- define slugs for other reports here for ease and reuse -->
-```{r define_slugs, opts.label='batch_chunk'}
-slugs <- list()
+```{r write_slugs}
+#| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
+#| slugs=list()
 ```
 
-<!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 [STAR]: https://academic.oup.com/bioinformatics/article/29/1/15/272537
 [RSEQC]: https://academic.oup.com/bioinformatics/article/28/16/2184/325191
@@ -92,7 +94,9 @@ First, we need to load the genome specification from the data repository. These 
 data(genome)
 ```
 
-```{r show_genome, echo=FALSE}
+```{r show_genome}
+#| echo=FALSE
+
 genome %>%
   enframe(name='', value='') %>%
   kableExtra::kable(format=if_else(interactive(), 'markdown', 'html'))
@@ -143,11 +147,17 @@ With the above arguments, the strandedness can be determined using [RSeQC][RSEQC
 
 The first 1 million records of the FastQ file(s) are extracted and saved to new files. This could be done any way, but because the records are in a random order taking the first records should be fine.
 
-```{bash subsample_fastq_single, eval=pairedness=='single_end' & !result_exists, echo=pairedness=='single_end'}
+```{bash subsample_fastq_single}
+#| echo=pairedness=='single_end',
+#| eval=pairedness=='single_end' & !result_exists
+
 gunzip --to-stdout ${R1_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R1.fastq
 ```
 
-```{bash subsample_fastq_paired, eval=pairedness=='paired_end' & !result_exists, echo=pairedness=='paired_end'}
+```{bash subsample_fastq_paired}
+#| echo=pairedness=='paired_end',
+#| eval=pairedness=='paired_end' & !result_exists
+
 gunzip --to-stdout ${R1_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R1.fastq
 gunzip --to-stdout ${R2_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R2.fastq
 ```
@@ -156,7 +166,10 @@ gunzip --to-stdout ${R2_FASTQ_FILE} | head --lines 4000000 > scratch/subsample_R
 
 [STAR][STAR] is used to align the subsampled data to the genome. The version of [STAR][STAR] used here is hard-coded and is `2.5.2a`.
 
-```{bash run_star_single, eval=pairedness=='single_end' & !result_exists, echo=pairedness=='single_end'}
+```{bash run_star_single}
+#| echo=pairedness=='single_end',
+#| eval=pairedness=='single_end' & !result_exists
+
 module load STAR/2.5.2a-foss-2016b
 
 STAR \
@@ -219,7 +232,9 @@ infer_experiment.py \
 
 The output of `infer_experiment.py` is shown below:
 
-```{r show_results, echo=FALSE}
+```{r show_results}
+#| echo=FALSE
+
 readLines('files/infer_experiment.result.txt') %>%
   str_subset('^$', negate=TRUE) %>%
   str_c('\n') %>%
@@ -231,7 +246,9 @@ For each pair of symbols (`++` for example), the symbols show the orientation of
 1. The proportion of reads in either class
 2. The orientation of the read to the transcript
 
-```{r reformat_results, echo=FALSE}
+```{r reformat_results}
+#| echo=FALSE
+
 readLines('files/infer_experiment.result.txt') %>%
   str_subset(':') %>%
   str_remove_all('"') %>%
@@ -250,7 +267,9 @@ readLines('files/infer_experiment.result.txt') %>%
   kable(x=select(., -proportion), format=if_else(interactive(), 'markdown', 'html')) -> results
 ```
 
-```{r get_conclusion, echo=FALSE}
+```{r get_conclusion}
+#| echo=FALSE
+
 results %>%
   arrange(proportion) %>%
   tail(n=1) %>%
@@ -269,20 +288,16 @@ results %>%
 `r conclusion` Check the table though!
 {{< /callout >}}
 
-<!-- include a references section -->
-
-```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+<!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r write_bibliography}
+#| bibliography_doi=c(RSeQC='10.1093/bioinformatics/bts356',
+#|                    STAR='10.1093/bioinformatics/bts635'),
+#| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 
 <!-- include a session information section -->
-
-```{r record_saved_objects, opts.label='batch_chunk'}
-#! names of object to be included in the table of hashes
-saved_objects <- c()
+```{r show_session_information}
+#| child=system.file('children/session_information.Rmd', package='project.notes.tools'),
+#| opts.label='batch_chunk',
+#| saved_objects=c()
 ```
-
-```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
-```
-
-<!-- end of session information -->
-

@@ -26,36 +26,33 @@ output:
 <!-- initial set up chunks are invisible -->
 
 <!-- read the standard knitr setup script -->
-```{r knitr_setup, echo=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```{r knitr_setup}
+#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
+#| echo=FALSE
 ```
 
 <!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```{bash setup_wd}
+#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- load any packages for the workbook -->
-```{r load_workbook_packages, opts.label='batch_chunk'}
+```{r load_workbook_packages}
+#| opts.label='batch_chunk'
 library(biomaRt)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
-```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
-```
-
-<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
-```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c(nextflow='10.1038/nbt.3820',
-  nfcore='10.1038/s41587-020-0439-x',
-  RSEM='10.1186%2F1471-2105-12-323',
-  STAR='10.1093/bioinformatics/bts635') -> bibliography_doi
-```
-
-<!-- write a bibliography -->
-```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```{r configure_r}
+#| code=readLines(system.file('chunks/environment.r', package='project.notes.tools')),
+#| opts.label='batch_chunk'
 ```
 
 <!-- set a ggplot theme to use as a base in the workbook -->
-```{r define_global_ggplot_theme, opts.label='batch_chunk'}
+```{r define_global_ggplot_theme}
+#| opts.label='batch_chunk'
+
 (theme_bw() +
  theme(text=element_text(size=10, colour='black'),
        panel.grid.minor=element_blank(),
@@ -64,7 +61,9 @@ theme_set()
 ```
 
 <!-- any final things to set for this workbook -->
-```{r final_setup, opts.label='batch_chunk'}
+```{r final_setup}
+#| opts.label='batch_chunk'
+
 data(genome)
 
 file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'pipeline_info', 'software_versions.tsv') %>%
@@ -72,12 +71,12 @@ file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'pipeline_info',
   deframe() -> software_versions
 ```
 
-<!-- define slugs for other reports here for ease and reuse -->
-```{r define_slugs, opts.label='batch_chunk'}
-slugs <- list()
+<!-- define shortcut links to other reports here for ease and reuse -->
+```{r write_slugs}
+#| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
+#| slugs=list()
 ```
 
-<!-- define shortcut links -->
 [CRICK]: https://www.crick.ac.uk
 [NFCORE RNASEQ]: https://nf-co.re/rnaseq/`r software_versions['nf-core/rnaseq']`
 [PICARD]: https://broadinstitute.github.io/picard
@@ -113,19 +112,25 @@ FastQC (version `r software_versions['fastqc']`) is run for each library and the
 
 <!-- copying files etc, no need to print the code -->
 
-```{r copy_mutliqc_report, echo=FALSE}
+```{r copy_mutliqc_report}
+#| echo=FALSE
+
 file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'multiqc', 'star_rsem') %>%
   sprintf(fmt='cp %s/multiqc_report.html files/multiqc_report.html') %>%
   system(ignore.stdout=TRUE, ignore.stderr=TRUE)
 ```
 
-```{r tar_fastqc, echo=FALSE}
+```{r tar_fastqc}
+#| echo=FALSE
+
 file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'fastqc') %>%
   sprintf(fmt='mkdir -p scratch/fastqc && ln -sf %s/*html scratch/fastqc/ && tar --directory scratch --dereference --create --file files/fastqc.tar fastqc') %>%
   system(ignore.stdout=TRUE, ignore.stderr=TRUE)
 ```
 
-```{r copy_pipeline_info, echo=FALSE}
+```{r copy_pipeline_info}
+#| echo=FALSE
+
 c('pipeline_report.txt', 'software_versions.tsv') %>%
   file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'pipeline_info', .) %>%
   subset(file.exists(.)) %>%
@@ -135,7 +140,9 @@ c('pipeline_report.txt', 'software_versions.tsv') %>%
 
 <!--  -->
 
-```{r load_data_for_replotting, echo=FALSE}
+```{r load_data_for_replotting}
+#| echo=FALSE
+
 data(mart)
 data(project_sample_sheet)
 
@@ -156,7 +163,9 @@ file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'star_rsem', 'rs
 
 The number of genes with non-zero expression is plotted below.
 
-```{r plot_detected_genes, dependson='load_data_for_replotting'}
+```{r plot_detected_genes}
+#| dependson='load_data_for_replotting'
+
 data(project_sample_sheet)
 min_expression <- 0
 
@@ -178,7 +187,10 @@ plot_data %>% {
   resize_and_show(width=min(nrow(project_sample_sheet)*0.25, 9), height=1.75)
 ```
 
-```{r show_detected_genes, echo=FALSE, dependson='plot_detected_genes'}
+```{r show_detected_genes}
+#| dependson='plot_detected_genes',
+#| echo=FALSE
+
 data(project_sample_sheet)
 
 plot_data %>%
@@ -233,7 +245,10 @@ The Picard metrics show:
 * "Secondary alignments" are other possible alignments (`256`+`272`)
 * "Duplicated reads" are the PCR or optical duplicates (`1024`+`1040`)
 
-```{r show_picard_results, echo=FALSE, dependson='load_picard_metrics'}
+```{r show_picard_results}
+#| dependson='load_picard_metrics',
+#| echo=FALSE
+
 data(project_sample_sheet)
 
 metrics %>%
@@ -252,20 +267,18 @@ This needs to be adapted for paired-end datasets!
 
 > Gene expression was quantified from raw FastQ files in the `r genome$version` genome with Ensembl release-`r genome$release` gene models using the nf-core/rnaseq pipeline (version `r software_versions['nf-core/rnaseq']`). Reads were trimmed for adapters with trimgalore (version `r software_versions['trimgalore']`) and aligned and quantified with RSEM/STAR (version `r software_versions['rsem']`). Data quality was inspected using FastQC (version `r software_versions['fastqc']`), Picard (version `r software_versions['picard']`) and RSeQC (version `r software_versions['rseqc']`).
 
-<!-- include a references section -->
-
-```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+<!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r write_bibliography}
+#| bibliography_doi=c(nextflow='10.1038/nbt.3820',
+#|                    nfcore='10.1038/s41587-020-0439-x',
+#|                    RSEM='10.1186%2F1471-2105-12-323',
+#|                    STAR='10.1093/bioinformatics/bts635'),
+#| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 
 <!-- include a session information section -->
-
-```{r record_saved_objects, opts.label='batch_chunk'}
-#! names of object to be included in the table of hashes
-saved_objects <- c()
+```{r show_session_information}
+#| child=system.file('children/session_information.Rmd', package='project.notes.tools'),
+#| opts.label='batch_chunk',
+#| saved_objects=c()
 ```
-
-```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
-```
-
-<!-- end of session information -->
-

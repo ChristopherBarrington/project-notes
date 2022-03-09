@@ -23,7 +23,12 @@ design:
     padding: ["20px", "0px", "0px", "0px"]
 ---
 
-```{r setup, echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE}
+```{r setup}
+#| echo=FALSE,
+#| cache=FALSE,
+#| message=FALSE},
+#| warning=FALSE
+
 options(warn=-1)
 
 library(knitr)
@@ -46,7 +51,9 @@ safely_pluck <- function(x, i) pluck(x, i, .default="Error extracting element fr
 
 ## Project summary
 
-```{r get_project_summary, eval=class(proposal_docx)=='docx'}
+```{r get_project_summary}
+#| eval=class(proposal_docx)=='docx'
+
 proposal_docx %>%
   safely_docx_extract_tbl(tbl_number=3, header=FALSE, preserve=TRUE) %>% pluck('result') %>%
   unlist() %>%
@@ -59,7 +66,9 @@ proposal_docx %>%
 
 ## Experimental approach
 
-```{r get_experimental_approach, eval=class(proposal_docx)=='docx'}
+```{r get_experimental_approach}
+#| eval=class(proposal_docx)=='docx'
+
 proposal_docx %>%
   safely_docx_extract_tbl(tbl_number=3, header=FALSE, preserve=TRUE) %>% pluck('result') %>%
   unlist() %>%
@@ -72,7 +81,9 @@ proposal_docx %>%
 
 ## Analysis goals
 
-```{r get_analysis_goals, eval=class(proposal_docx)=='docx'}
+```{r get_analysis_goals}
+#| eval=class(proposal_docx)=='docx'
+
 proposal_docx %>%
   safely_docx_extract_tbl(tbl_number=4, header=FALSE, preserve=TRUE) %>% pluck('result') %>%
   unlist() %>%
@@ -85,7 +96,9 @@ proposal_docx %>%
 
 ## Analysis details
 
-```{r get_analysis_details, eval=class(proposal_docx)=='docx'}
+```{r get_analysis_details}
+#| eval=class(proposal_docx)=='docx'
+
 proposal_docx %>%
   safely_docx_extract_tbl(tbl_number=4, header=FALSE, preserve=TRUE) %>% pluck('result') %>%
   unlist() %>%
@@ -96,7 +109,9 @@ proposal_docx %>%
   cat()
 ```
 
-```{r add_project_proposal_link, echo=FALSE}
+```{r add_project_proposal_link}
+#| echo=FALSE
+
 cat('{{< callout automated >}}\n')
 system.file('docs/proposal.docx', package='datarepository') %>%
   when(.!=''~{dir.create(path='files', showWarnings=FALSE)

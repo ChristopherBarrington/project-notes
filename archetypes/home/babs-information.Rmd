@@ -23,7 +23,13 @@ design:
     padding: ["20px", "0px", "0px", "0px"]
 ---
 
-```{r setup, echo=FALSE, cache=FALSE, results='asis', warning=FALSE, message=FALSE}
+```{r setup}
+#| cache=FALSE,
+#| echo=FALSE,
+#| message=FALSE,
+#| results='asis',
+#| warning=FALSE
+
 options(warn=-1)
 
 library(knitr)

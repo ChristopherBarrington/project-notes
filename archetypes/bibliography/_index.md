@@ -7,4 +7,4 @@ weight: 201
 view: 5
 ---
 
-A bibliography of references to academic papers. These are significant pieces of software that may be used at any stage of the analysis of the data in this project.
+A bibliography of references to academic papers. These can include significant pieces of software that may be used at any stage of the analysis of the data in this project.

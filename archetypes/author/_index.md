@@ -18,24 +18,24 @@ social:
   - label: Send an email
     icon: envelope
     icon_pack: far
-    link: mailto:{{ .File.Path | path.Dir | path.Base | replaceRE "-" "." }}@crick.ac.uk?subject={{ getenv "LIMSID" | default "" }}
+    link: mailto:{{ .File.Path | path.Dir | path.Base | replaceRE "-" "." }}@crick.ac.uk?subject={{ getenv "LIMSID" | default "BABS project help" }}
     display:
       header: true
       footer: true
   - label: GitHub
     icon: github-alt
     icon_pack: fab
-    link: https://github.com/{{ getenv "GITHUB" | default "CrickBABS" }}
+    link: https://github.com/{{ getenv "GITHUB" | default "FrancisCrickInstitute" }}
     display:
       header: true
       footer: false
   - label: ORCID
     icon: orcid
     icon_pack: ai
-    link: https://orcid.org/{{ getenv "ORCID" | default "0000-0003-1281-2658" }}
+    link: https://orcid.org/{{ getenv "ORCID" | default "0000-0000-0000-0000" }}
     display:
       header: true
       footer: false
 ---
 
-<!-- hugo new --kind author authors/christopher-barrington -->
+<!-- GITHUB=ChristopherBarrington ORCID=0000-0003-1281-2658 LIMSID=`ts get key=Lims` hugo new --kind author authors/christopher-barrington -->

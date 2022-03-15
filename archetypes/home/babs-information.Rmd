@@ -46,7 +46,7 @@ system.file('docs/babs.yaml', package='datarepository') %>%
   modify_at('Scientist', str_remove, pattern='@crick.ac.uk') %>%
   modify_at('Lims', str_remove_all, pattern='^(asf)-') %>%
   as.data.frame() %>%
-  select(`LIMS ID`=Lims, Scientist, Lab, `Cost code`=Code, `Time estimate`=Estimate, Bioinformatician, `Directory`=Path, Project, `BABS hash`=Hash) %>%
+  select(`LIMS ID(s)`=Lims, Scientist, Lab, `Cost code`=Code, `Time estimate`=Estimate, Bioinformatician, `Directory`=Path, Project, `BABS hash`=Hash) %>%
   unlist() %>%
   enframe('', '') %>%
   kable(format='markdown')

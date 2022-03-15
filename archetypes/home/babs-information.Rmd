@@ -42,8 +42,9 @@ system.file('docs/babs.yaml', package='datarepository') %>%
   str_replace_all(pattern='\\{.+\\}', replacement='unspecified') %>%
   read_yaml(text=.) %>%
   pluck(1) %>%
-  map_at('Path', basename) %>%
-  map_at('Scientist', str_remove, pattern='@crick.ac.uk') %>%
+  modify_at('Path', basename) %>%
+  modify_at('Scientist', str_remove, pattern='@crick.ac.uk') %>%
+  modify_at('Lims', str_remove_all, pattern='^(asf)-') %>%
   as.data.frame() %>%
   select(`LIMS ID`=Lims, Scientist, Lab, `Cost code`=Code, `Time estimate`=Estimate, Bioinformatician, `Directory`=Path, Project, `BABS hash`=Hash) %>%
   unlist() %>%

@@ -1,9 +1,8 @@
 ---
 title: Create Project Data
-weight: 1
+weight:
 
 categories:
-
 tags:
 
 authors:
@@ -40,6 +39,7 @@ output:
 <!-- load any packages for the workbook -->
 ```{r load_workbook_packages}
 #| opts.label='batch_chunk'
+
 library(urltools)
 library(yaml)
 ```

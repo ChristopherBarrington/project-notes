@@ -3,7 +3,6 @@ title: {{ default (.File.Path | path.Dir | path.Base | replaceRE "^20\\d+-\\d+-\
 weight:
 
 categories:
-
 tags:
 
 authors:
@@ -17,6 +16,6 @@ toc: false
 draft: false
 ---
 
-Anything here is included in the summary.
+{{ default "<!-- Anything here is included in the summary. -->" (getenv "SUMMARY") }}
 
 <!--more-->

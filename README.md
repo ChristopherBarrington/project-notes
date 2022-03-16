@@ -31,7 +31,7 @@ conda install python=3.9.7
 pip3 install academic
 ```
 
-### make an author
+## make an author
 
 ```bash
 hugo new --kind authors authors
@@ -43,7 +43,13 @@ GITHUB=ChristopherBarrington ORCID=0000-0003-1281-2658 LIMSID=`ts get key=Lims` 
 
 __Note the lack of `.` in the name, it is interpreted as a file extension. Should be the first part of our crick email.__
 
-### make the home page
+## make a bibliography
+
+```bash
+hugo new --kind bibliography publication
+````
+
+## make the home page
 
 ```bash
 TITLE=`ts get key=Scititle` hugo new --kind home home
@@ -66,7 +72,7 @@ hugo new --kind docs new-docs
 hugo new --kind doc new-docs/new-doc/index.Rmd
 ```
 
-## callouts
+### callouts
 
 ```go
 {{< callout [info,warning,notice,question,result,automated] >}}
@@ -74,7 +80,7 @@ Text in the callout.
 {{< /callout >}}
 ```
 
-## in-text icons
+### in-text icons
 
 ```go
 {{< icon name="file-word" pack="fas" >}}

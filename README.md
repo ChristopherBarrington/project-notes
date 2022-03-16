@@ -61,7 +61,6 @@ TITLE=`ts get key=Scititle` hugo new --kind home home
 Rscript -e 'knitr::knit("babs-information.Rmd")'
 Rscript -e 'knitr::knit("project-background.Rmd")'
 ```
-
 ## make new content
 
 ```bash
@@ -71,7 +70,12 @@ hugo new --kind chapter new-book/new-chapter/index.Rmd
 hugo new --kind docs new-docs
 hugo new --kind doc new-docs/new-doc/index.Rmd
 ```
+### project data section
 
+```bash
+hugo new --kind docs project-data
+hugo new --kind doc project-data/define-project-parameters/index.Rmd
+````
 ### callouts
 
 ```go
@@ -91,4 +95,3 @@ Text in the callout.
 ```bash
 HUGO_TITLE=`ts get key=Scititle` hugo
 ```
-

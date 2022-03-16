@@ -122,10 +122,13 @@ list(species='homo_sapiens', version='GRCh38',
 save(genome)
 ```
 
-```{r show_genome, dependson='define_genome', echo=FALSE}
+```{r show_genome}
+#| dependson='define_genome',
+#| echo=FALSE
+
 genome %>%
   as.data.frame() %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'))
+  kable(format='markdown')
 ```
 
 <!--  -->

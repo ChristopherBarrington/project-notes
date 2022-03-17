@@ -3,7 +3,6 @@ title: {{ default "Comparison of cluster resolutions with `clustree`" (getenv "T
 weight:
 
 categories:
-
 tags:
 
 authors:

@@ -3,7 +3,6 @@ title: {{ default (.File.Path | path.Dir | path.Base | replaceRE "^20\\d+-\\d+-\
 weight: 
 
 categories:
-
 tags:
 
 authors:

@@ -127,15 +127,15 @@ save(genome)
 #| echo=FALSE
 
 genome %>%
-  as.data.frame() %>%
-  kable(format='markdown')
+  enframe(name='Attribute', value='Value') %>%
+  kable('markdown')
 ```
 
 <!--  -->
 
 ## Create a BioMart connection
 
-Here, a connection to the Ensembl archive is created and saved to the `data-repository`.
+Here, a connection to the Ensembl BioMart archive is created using `biomaRt` and saved to the `data-repository`.
 
 ```{r connect_to_biomart}
 data(genome)

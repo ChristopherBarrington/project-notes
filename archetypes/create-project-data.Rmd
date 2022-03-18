@@ -183,7 +183,11 @@ Any project-specific additions/modifications to the metadata are made in the fol
 #! any project-specific modifications should be made here
 
 #! list of variables to convert to factors and the levels that they should have
-#! can optionally be a named vector
+#! can be one of :
+#! * a vector: c('first', 'second')
+#! * a named vector: c(one='1', two='2')
+#! * a function: fct_inorder
+#! * NA which will default to fct_inorder
 list() -> factor_levels
 
 #! define the complete set of metadata for the project
@@ -196,9 +200,11 @@ list(project_design,
 complete_sample_sheet[names(factor_levels)] %<>%
   Map(data=., levels=factor_levels, function(data, levels)
     data %>%
-      fct_relevel(levels) %>%
-      when(names(levels) %>% is.null() ~ .,
-           TRUE ~ fct_recode(., !!!levels)))
+      as.factor() %>%
+      when(is.function(levels) ~ levels(.),
+           is.na(levels) ~ fct_inorder(.),
+           names(levels) %>% is.null() %>% not() ~ fct_recode(., !!!levels),
+           TRUE ~ fct_relevel(., levels)))
 
 #! subset the complete sample sheet
 complete_sample_sheet %>%

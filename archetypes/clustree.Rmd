@@ -26,13 +26,13 @@ output:
 
 <!-- read the standard knitr setup script -->
 ```{r knitr_setup}
-#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
+#| file=system.file('chunks/knitr.r', package='project.notes.tools'),
 #| echo=FALSE
 ```
 
 <!-- make subdirectories to write into/any bash work -->
 ```{bash setup_wd}
-#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| file=system.file('chunks/working_directory.sh', package='project.notes.tools'),
 #| opts.label='batch_chunk'
 ```
 
@@ -46,7 +46,7 @@ library(Seurat)
 
 <!-- read the standard setup script, loading well-used libraries -->
 ```{r configure_r}
-#| code=readLines(system.file('chunks/environment.r', package='project.notes.tools')),
+#| file=system.file('chunks/environment.r', package='project.notes.tools'),
 #| opts.label='batch_chunk'
 ```
 

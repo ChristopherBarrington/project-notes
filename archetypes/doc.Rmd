@@ -12,8 +12,8 @@ type: docs
 toc: true
 draft: false
 
-date: `r format(Sys.time(), "%Y-%m-%d")`
-created: {{ now.Format "2006-01-02" }}
+lastmod: `r format(Sys.time(), "%Y-%m-%d")`
+date: {{ now.Format "2006-01-02" }}
 
 always_allow_html: true
 output:

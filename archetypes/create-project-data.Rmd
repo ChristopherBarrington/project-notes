@@ -112,7 +112,8 @@ The genome is defined here and saved to the data-repository.
 
 ```{r define_genome}
 list(species='homo_sapiens', version='GRCh38',
-     source='ensembl', release='95')  %>%
+     source='ensembl', release='95',
+     seqinfo=Seqinfo())  %>%
   modify_at('release', as.character) %>%
   list_modify(organism=str_replace(.$species, pattern='^(.)(.*_)(.*)$', replacement='\\1\\3'),
               org.db={str_replace(.$species, pattern='^(.).*_(.).*$', replacement='\\1\\2') %>%

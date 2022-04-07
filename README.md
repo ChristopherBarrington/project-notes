@@ -33,9 +33,13 @@ pip3 install academic
 
 ## make an author
 
+First make the authors directory
+
 ```bash
 hugo new --kind authors authors
 ```
+
+Then make an author
 
 ```bash
 GITHUB=ChristopherBarrington ORCID=0000-0003-1281-2658 LIMSID=`ts get key=Lims` hugo new --kind author authors/christopher-barrington

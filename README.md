@@ -78,7 +78,7 @@ hugo new --kind doc new-docs/new-doc/index.Rmd
 
 ```bash
 hugo new --kind docs project-data
-hugo new --kind doc project-data/define-project-parameters/index.Rmd
+hugo new --kind create-project-data project-data/define-project-parameters/index.Rmd
 ````
 ### callouts
 

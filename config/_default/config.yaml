@@ -57,6 +57,7 @@ ignoreFiles:
   - renv.lock
   - scratch
   - .future
+  - ^VennDiagram.*
 
 # https://gohugo.io/getting-started/configuration-markup/
 markup:

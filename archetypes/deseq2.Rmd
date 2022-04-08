@@ -370,7 +370,9 @@ In this section, a set of contrasts are defined from which differentially expres
 The names of pairwise comparisons are specified as treatment vs control.
 {{< /callout >}}
 
-```{r get_comparisons_config, dependson='make_dds'}
+```{r get_comparisons_config}
+#| dependson='make_dds'
+
 list(`contrast name`=list(dds=dds, design=~col1, contrast=c(group='col1', treated='treated', control='control')),
      `contrast name`=list(dds=dds[,dds$col2=='foo'], design=~col1, contrast=c(group='col1', treated='treated', control='control')),
      `LRT name`=list(dds=dds, design=~col1+col2, reduced=~col2)) %>%

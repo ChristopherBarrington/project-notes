@@ -1,6 +1,6 @@
 ---
 title: Identify affected genes with DESeq2
-weight: 1
+weight: 
 
 categories:
 tags:
@@ -25,15 +25,21 @@ output:
 <!-- initial set up chunks are invisible -->
 
 <!-- read the standard knitr setup script -->
-```{r knitr_setup, echo=FALSE, code=readLines(system.file('chunks/knitr.r', package='project.notes.tools'))}
+```{r knitr_setup}
+#| file=system.file('chunks/knitr.r', package='project.notes.tools'),
+#| echo=FALSE
 ```
 
 <!-- make subdirectories to write into/any bash work -->
-```{bash setup_wd, opts.label='batch_chunk', code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools'))}
+```{bash setup_wd}
+#| file=system.file('chunks/working_directory.sh', package='project.notes.tools'),
+#| opts.label='batch_chunk'
 ```
 
 <!-- load any packages for the workbook -->
-```{r load_workbook_packages, opts.label='batch_chunk'}
+```{r load_workbook_packages}
+#| opts.label='batch_chunk'
+
 library(tximport)
 library(ashr)
 library(DESeq2)
@@ -47,46 +53,31 @@ library(ggrepel)
 ```
 
 <!-- read the standard setup script, loading well-used libraries -->
-```{r configure_r, opts.label='batch_chunk', code=readLines(system.file('chunks/environment.r', package='project.notes.tools'))}
-```
-
-<!-- DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
-```{r add_doi_to_bibliography, cache=TRUE, echo=FALSE}
-c(deseq2='10.1186/s13059-014-0550-8',
-  deseq2_bioc='10.18129/B9.bioc.DESeq2',
-  tximport='10.12688/f1000research.7563.1',
-  tximport_bioc='10.18129/B9.bioc.tximport',
-  degreport='10.18129/B9.bioc.DEGreport',
-  upsetr='10.1093/bioinformatics/btx364') -> bibliography_doi
-```
-
-<!-- write a bibliography -->
-```{r write_bibliography, dependson='add_doi_to_bibliography', cache=TRUE, echo=FALSE, code=readLines(system.file('chunks/write_bibliography.r', package='project.notes.tools'))}
+```{r configure_r}
+#| file=system.file('chunks/environment.r', package='project.notes.tools'),
+#| opts.label='batch_chunk'
 ```
 
 <!-- set a ggplot theme to use as a base in the workbook -->
-```{r define_global_ggplot_theme, opts.label='batch_chunk'}
-(theme_bw() +
- theme(text=element_text(size=8, colour='black'),
-       panel.grid.minor=element_blank(),
-       strip.background=element_blank())) %>%
-theme_set()
+```{r define_global_ggplot_theme}
+#| file=system.file('chunks/ggplot_theme.r', package='project.notes.tools'),
+#| opts.label='batch_chunk'
 ```
 
 <!-- any final things to set for this workbook -->
-```{r final_setup, opts.label='batch_chunk'}
+```{r final_setup}
+#| opts.label='batch_chunk'
+
 project <- read_dotbabs()
 ```
 
-<!-- define slugs for other reports here for ease and reuse -->
-```{r define_slugs, opts.label='batch_chunk'}
-list(`project data post`='create-project-data',
-     `project data post sample sheet`='create-project-data#read-and-parse-metadata',
-     `nfrnaseq post`='nfcore-rnaseq') -> slugs
+```{r write_slugs}
+## define shortcut links to other reports here for ease and reuse
+#| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
+#| slugs=list(`project data post`='create-project-data',
+#|            `project data post sample sheet`='create-project-data#read-and-parse-metadata',
+#|            `nfrnaseq post`='nfcore-rnaseq')
 ```
-
-<!-- define shortcut links -->
-[CRICK]: https://www.crick.ac.uk
 
 [deseq2 doi]: https://doi.org/doi:10.18129/B9.bioc.DESeq2
 [tximport doi]: https://doi.org/doi:10.18129/B9.bioc.tximport
@@ -101,9 +92,6 @@ list(`project data post`='create-project-data',
 [nfcore rnaseq]: https://nf-co.re/rnaseq
 [pheatmap cran]: https://cran.r-project.org/web/packages/pheatmap/index.html
 [tximport from rsem]: https://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html#RSEM
-
-```{r write_slugs, opts.label='batch_chunk', code=readLines(system.file('chunks/write_slugs.r', package='project.notes.tools')), results='asis'}
-```
 
 <!-- end of initial set up chunks -->
 
@@ -148,7 +136,9 @@ Now a DESeq2 dataset object is created from the `tximport` list using [`DESeq2::
 
 A dummy design is applied here, it will be replaced later when the sample comparisons are defined.
 
-```{r make_dds, dependson=c('get_ensembl_to_name', 'make_txi')}
+```{r make_dds}
+#| dependson=c('get_ensembl_to_name', 'make_txi')
+
 data(project_sample_sheet)
 
 project_sample_sheet %<>%
@@ -163,9 +153,12 @@ assay(dds, 'vst') <- varianceStabilizingTransformation(object=dds, blind=TRUE) %
 # assay(dds, 'rlog') <- rlogTransformation(object=dds, blind=TRUE) %>% assay()
 ```
 
-The sample sheet was defined in [{{< post-title "create-project-data" >}}][] and is shown below.
+The sample sheet was defined in [{{< post-title "create-project-data" >}}][project data post sample sheet] and is shown below.
 
-```{r text_n_rows_project_sample_sheet, echo=FALSE, results='asis'}
+```{r text_n_rows_project_sample_sheet}
+#| echo=FALSE,
+#|results='asis'
+
 project_sample_sheet %>%
   nrow() %>%
   when(.>10~comma(.) %>% sprintf(fmt='The first 10 (of %s) rows of the `project_sample_sheet` are shown below.'),
@@ -173,18 +166,16 @@ project_sample_sheet %>%
   cat()
 ```
 
-```{r show_project_sample_sheet, echo=FALSE}
+```{r show_project_sample_sheet}
+#| echo=FALSE
+
 head(project_sample_sheet, n=10) %>%
   kable(format=if_else(interactive(), 'markdown', 'html'))
 ```
 
-<!--  -->
-
 ## Dataset relationships
 
 The normalised counts are used here to describe the relationships between datasets.
-
-<!--  -->
 
 ### Distance matrix
 
@@ -192,7 +183,9 @@ A distance matrix is calculated using the `dist()` function and the Euclidean me
 
 The `labels` argument is a list of `colData` variables that should be concatenated together to form sample names. The `annotation` argument is `colData` variables for which coloured blocks will be added to highlight the metadata of the samples.
 
-```{r distance_matrix, dependson='make_dds'}
+```{r distance_matrix}
+#| dependson='make_dds'
+
 make_distance_matrix <- function(dds, assay='rlog', labels, annotations=labels, cellsize=12) {
   brewer.pal(n=8, name='YlGnBu') %>%
     rev() %>%
@@ -239,8 +232,6 @@ make_distance_matrix(dds=dds, assay='vst',
                      annotations=colnames(colData(dds))[-1]) %>%
   show_newpage_grid()
 ```
-
-<!--  -->
 
 ### PCA and covariates
 
@@ -335,7 +326,7 @@ make_covariate_association <- function(dds, assay='rlog', labels=metadata(dds)$l
 
 These functions can now be used with subsets of the `dds` object.
 
-{{< callout "danger" >}}
+{{< callout danger >}}
 These tabs need to be generalised! Nested list of plot objects?
 {{< /callout >}}
 
@@ -371,30 +362,26 @@ dds[,dds$col1=='SOMETHING'] %>%
 
 {{< /tabs >}}
 
-<!--  -->
-
 ## Collect results of differential expression
 
 In this section, a set of contrasts are defined from which differentially expressed genes will be identified. The format of contrasts is detailed in the [DESeq2 vignette][deseq2 vignette contrasts] and in this [DESeq2 workshop][deseq2 workshop].
 
-{{< callout "info" >}}
+{{< callout info >}}
 The names of pairwise comparisons are specified as treatment vs control.
 {{< /callout >}}
 
 ```{r get_comparisons_config, dependson='make_dds'}
 list(`contrast name`=list(dds=dds, design=~col1, contrast=c(group='col1', treated='treated', control='control')),
-     `contrast name`=list(dds=dds[,dds$col2=='foo', design=~col1, contrast=c(group='col1', treated='treated', control='control')),
+     `contrast name`=list(dds=dds[,dds$col2=='foo'], design=~col1, contrast=c(group='col1', treated='treated', control='control')),
      `LRT name`=list(dds=dds, design=~col1+col2, reduced=~col2)) %>%
   Map(x=., n=names(.), function(x, n) append(x, list(comparison=n))) -> comparisons_config
 ```
-
-<!--  -->
 
 ### Get results
 
 Now the contrasts defined above are used to calculate the results of differential expression. FDR thresholds (`alpha`) ranges are independently assessed due to the [independent filtering][deseq2 vignette ind filt] applied by DESeq2.
 
-{{< callout "note" >}}
+{{< callout note >}}
 A zero count in the `baseMean` shows that the gene was not detected in any sample. A missing value in the `pvalue` column shows the gene count in a sample was classified as an outlier. A missing value in the `padj` column indicates the gene failed independent filtering at the specified FDR (`alpha`) threshold. See the [DESeq2 vignette][deseq2 vignette na results] for further information.
 {{< /callout >}}
 
@@ -512,7 +499,9 @@ The `ncores` argument is required by the above function and should match the `cp
 
 The above function returns a list of objects, each of which are saved into variables in the environment. The object is then deleted to save space.
 
-```{r collect_results, dependson=c('make_dds', 'get_comparisons_config', 'function_to_run_deseq2')}
+```{r collect_results}
+#| dependson=c('make_dds', 'get_comparisons_config', 'function_to_run_deseq2')
+
 alphas <- c(0.001, 0.01, 0.05, 0.1)
 target_alpha <- 0.01
 cpus_per_task <- 8
@@ -534,13 +523,14 @@ rm(deseq2_results)
 
 The `all_dds`, `all_DESeqResults` and `results_summary` objects are saved into the data repository.
 
-```{r save_results, dependson='collect_results', echo=FALSE}
+```{r save_results}
+#| dependson='collect_results',
+#| echo=FALSE
+
 save(all_DESeqResults)
 save(all_dds)
 save(results_summary)
 ```
-
-<!--  -->
 
 ## Visualise results
 
@@ -563,7 +553,10 @@ validated_genes %<>%
 
 These plots show the normalised expression counts (via the `DESeq2::counts(norm=TRUE)` function) in all comparisons defined above.
 
-```{r get_feature_count_plots, dependson=c('set_validated_genes','collect_results'), eval=length(validated_genes)>0}
+```{r get_feature_count_plots}
+#| dependson=c('set_validated_genes','collect_results'),
+#| eval=length(validated_genes)>0
+
 plot_feature_counts <- function(dds, features, x) {
   if(missing(x) && {metadata(dds) %>% names() %>% is_in(x='contrast')})
     metadata(dds) %>%
@@ -611,21 +604,28 @@ all_dds %>%
   llply(.parallel=TRUE, plot_feature_counts, features=validated_genes) -> plots_list
 ```
 
-```{r show_feature_count_plots, dependson='get_feature_count_plots', echo=FALSE, results='asis', eval=length(validated_genes)>0}
-cat('{{< tabs "show_feature_count_plots" >}}\n')
+```{r show_feature_count_plots}
+#| dependson='get_feature_count_plots',
+#| echo=FALSE,
+#| eval=length(validated_genes)>0,
+#| results='asis'
+
+cat('{{< tabs "show_feature_count_plots" >}}', sep='\n')
 for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
   plots_list[[i]] %>% resize_and_show(height=2, orientation='p')
-  cat('{{< /tab >}}')
+  cat('{{< /tab >}}', sep='\n')
 }
-cat('{{< /tabs >}}\n')
+cat('{{< /tabs >}}', sep='\n')
 ```
 
-```{r show_no_validated_genes_notice, echo=FALSE, results='asis', eval=length(validated_genes)==0}
-cat('_*No validated genes were supplied!*_\n')
-```
+```{r show_no_validated_genes_notice}
+#| echo=FALSE,
+#| eval=length(validated_genes)==0,
+#| results='asis'
 
-<!--  -->
+cat('_*No validated genes were supplied!*_', sep='\n')
+```
 
 ### Replicate variability
 
@@ -659,24 +659,27 @@ make_dispersion_plot <- function(dds)
             plot.title=element_text(hjust=0.5))
 ```
 
-{{< tabs "plot_dispersion_plots_for_each_comparison" >}}
-```{r plot_dispersion_plots_for_each_comparison, dependson=c('collect_results', 'function_to_make_dispersion_plots'), echo=FALSE, results='asis'}
-for(i in names(all_dds)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  make_dispersion_plot(dds=all_dds[[i]]) %>%
-    resize_and_show(width=2)
-  cat('{{< /tab >}}')
-}
-```
-{{< /tabs >}}
+```{r show_dispersion_plots_for_each_comparison}
+#| dependson=c('collect_results', 'function_to_make_dispersion_plots'),
+#| echo=FALSE,
+#| results='asis'
 
-<!--  -->
+cat('{{< tabs "show_feature_count_plots" >}}', sep='\n')
+for(i in names(all_dds)) {
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  make_dispersion_plot(dds=all_dds[[i]]) %>% resize_and_show(width=2)
+  cat('{{< /tab >}}', sep='\n')
+}
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ### Cook's distance
 
 This measures the effect of removing one sample from a replicate group on the estimated log fold change of a gene. A very high value indicates that removing the sample had a big impact on the fold change estimate and may be an outlier count or sample.
 
-```{r get_cooks_distance_for_each_comparison, dependson='collect_results'}
+```{r get_cooks_distance_for_each_comparison}
+#| dependson='collect_results'
+
 get_cooks_distance_plots <- function(dds) {
     assay(dds, 'cooks') %>%
       {.[!is.na(rowSums(.)),]} %>%
@@ -708,23 +711,30 @@ all_dds %>%
   llply(.parallel=TRUE, get_cooks_distance_plots) -> plots_list
 ```
 
-{{< tabs "show_cooks_distance_for_each_comparison" >}}
-```{r show_cooks_distance_for_each_comparison, dependson='get_cooks_distance_for_each_comparison', echo=FALSE, results='asis'}
-for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  {plots_list[[i]]$density + plots_list[[i]]$boxplot + plot_layout(widths=unit(3,'in'), height=unit(3/1.6, 'in'))} %>% show()
-  cat('{{< /tab >}}')
-}
-```
-{{< /tabs >}}
+```{r show_cooks_distance_for_each_comparison}
+#| dependson='get_cooks_distance_for_each_comparison',
+#| echo=FALSE,
+#| results='asis'
 
-<!--  -->
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  {pluck(plot_list, i, 'density') + pluck(plots_list, i, 'boxplot') + plot_layout(widths=unit(3,'in'), height=unit(3/1.6, 'in'))} %>% show()
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ### Independent filtering
 
 These plots show the level of expression required to satisfy a minimum threshold. [Independent filtering][deseq2 vignette ind filt] is designed to remove the low-signal features that are too low count to be significant and detrimentally affect multiple testing correction - but are importantly not filtered by significance. Non-zero count features are removed according to their baseMean and the number of significant features determined. The baseMean threshold is increased and the number of rejections recalculated. The baseMean threshold is determined as a standard deviation of the maximum. Features with less than the threshold are independently filtered (by baseMean) before multiple testing correction.
 
-```{r get_independent_filtering_plots, dependson='collect_results'}
+```{r get_independent_filtering_plots}
+#| dependson='collect_results'
+
 plot_independent_filtering <- function(dds, res=metadata(dds)$DESeqResults)
   res %>%
     metadata() %>%
@@ -743,23 +753,30 @@ all_dds %>%
   llply(.parallel=TRUE, plot_independent_filtering) -> plots_list
 ```
 
-{{< tabs "show_independent_filtering_plots" >}}
-```{r show_independent_filtering_plots, dependson='get_independent_filtering_plots', echo=FALSE, results='asis'}
-for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  plots_list[[i]] %>% resize_and_show(width=3.5, clip=FALSE)
-  cat('{{< /tab >}}')
-}
-```
-{{< /tabs >}}
+```{r show_independent_filtering_plots}
+#| dependson='get_independent_filtering_plots',
+#| echo=FALSE,
+#| results='asis'
 
-<!--  -->
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% resize_and_show(width=3.5, clip=FALSE)
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ### Heatmaps of variable features
 
 These heatmaps select the top `n` features by their variability across the `dds`. These are _not necessarily_ significantly differentially expressed.
 
-```{r get_variable_features_heatmaps, dependson='collect_results'}
+```{r get_variable_features_heatmaps}
+#| dependson='collect_results'
+
 make_variable_features_heatmap <- function(dds, n, annotations=NULL, assay='vst', opts=list()) {
   colData(dds) %>%
     as.data.frame() %>%
@@ -790,45 +807,58 @@ all_dds %>%
         n=1000, annotations=c('col1', 'col2', 'col3')) -> plots_list
 ```
 
-{{< tabs "show_variable_features_heatmaps" >}}
-```{r show_variable_features_heatmaps, dependson='get_variable_features_heatmaps', echo=FALSE, results='asis'}
-for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  plots_list[[i]] %>% resize_and_show(width=2, orientation='p')
-  cat('{{< /tab >}}')
-}
-```
-{{</ tabs >}}
+```{r show_variable_features_heatmaps}
+#| dependson='get_variable_features_heatmaps',
+#| echo=FALSE,
+#| results='asis'
 
-<!--  -->
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% resize_and_show(width=2, orientation='p')
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ### PCA
 
 PCA plots for each `dds` object in the comparison are plotted here.
 
-{{< tabs "show_pca_plots_for_each_comparison" >}}
-```{r show_pca_plots_for_each_comparison, dependson=c('collect_results', 'pca_plot_functions'), echo=FALSE, results='asis'}
+```{r show_pca_plots_for_each_comparison}
+#| dependson=c('collect_results', 'pca_plot_functions'),
+#| echo=FALSE,
+#| results='asis'
+
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
 comparisons_config %>%
   discard(function(x) is_in('reduced', names(x))) %>%
   names() -> wald_comparisons
 
+# show the plots
 for(i in names(all_dds[wald_comparisons])) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
   assay(all_dds[[i]], 'vst') %>%
     make_pca_plot(counts=., n=1000, dds=all_dds[[i]], shape=metadata(all_dds[[i]])$contrast['group'], colour=metadata(all_dds[[i]])$contrast['group'], label=NULL) %>%
     resize_and_show(width=2)
-  cat('{{< /tab >}}')
+  cat('{{< /tab >}}', sep='\n')
 }
-```
-{{< /tabs >}}
 
-<!--  -->
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ### FDR thresholds
 
 The following plot shows how many features would be considered significantly different at multiple adjusted pvalue thresholds (FDR or `alpha`).
 
-```{r get_fdr_thresholds_plots, dependson=c('collect_results'), fig.height=30}
+```{r get_fdr_thresholds_plots}
+#| dependson=c('collect_results'),
+#| fig.height=30
+
 make_number_of_different_features_plot <- function(results_df)
   results_df %>%
     drop_na() %>%
@@ -860,50 +890,61 @@ results_summary %>%
   dlply(~comparison, .parallel=TRUE, make_number_of_different_features_plot) -> plots_list
 ```
 
-{{< tabs "show_fdr_thresholds_plots" >}}
-```{r show_fdr_thresholds_plots, dependson='get_fdr_thresholds_plots', echo=FALSE, results='asis'}
-for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  plots_list[[i]] %>% resize_and_show(size=1.6)
-  cat('{{< /tab >}}')
-}
-```
-{{</ tabs >}}
+```{r show_fdr_thresholds_plots}
+#| dependson='get_fdr_thresholds_plots',
+#| echo=FALSE,
+#| results='asis'
 
-```{r show_fdr_thresholds_table, dependson=c('collect_results'), echo=FALSE}
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% resize_and_show(size=1.6)
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
+
+```{r show_fdr_thresholds_table}
+#| dependson=c('collect_results'),
+#| echo=FALSE
+
 results_summary %>%
   group_by(comparison, alpha) %>%
   summarise(n=sum(padj<=alpha, na.rm=TRUE)) %>%
   spread(key=alpha, value=n, fill=0) %>%
   as.data.frame() %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'),
+  kable(format='markdown',
         format.args=list(big.mark=','))
 ```
-
-<!--  -->
 
 ### Number of differentially expressed genes
 
 The number of outcomes (at `r percent(target_alpha)` FDR) are summarised in the table below.
 
-```{r show_table_of_outcomes, dependson='collect_results', echo=FALSE}
+```{r show_table_of_outcomes}
+#| dependson='collect_results',
+#| echo=FALSE
+
 all_dds %>%
   ldply(.id='comparison', .parallel=TRUE, function(x)
     metadata(x) %>% pluck('results') %>% as.data.frame()) %>%
   group_by(comparison, outcome) %>%
   tally() %>%
   spread(key=outcome, value=n, fill=0) %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'),
+  kable(format='markdown',
         format.args=list(big.mark=','))
 ```
-
-<!--  -->
 
 ### Similarity between gene sets
 
 The genes and direction of change will be compared to show the similarity of gene expression changes between comparisons.
 
-```{r get_de_gene_sets, dependson='collect_results'}
+```{r get_de_gene_sets}
+#| dependson='collect_results'
+
 all_dds %>%
   keep(function(x) metadata(x) %>% names() %>% is_in(x='contrast')) %>%
   names() %>%
@@ -919,7 +960,11 @@ all_dds %>%
       do.call(what=str_c)) -> de_gene_sets
 ```
 
-```{r show_venn_compare_de_gene_sets_plots, dependson='get_de_gene_sets', fig.width=3, fig.height=3}
+```{r show_venn_compare_de_gene_sets_plots}
+#| dependson='get_de_gene_sets',
+#| fig.height=3,
+#| fig.width=3
+
 palette <- brewer.pal(name='Dark2', n=3)
 category_distances <- c(0.1, 0.1, 0.05)
 
@@ -934,14 +979,21 @@ venn.diagram(x=de_gene_sets,
   show_newpage_grid()
 ```
 
-```{r show_upsetr_compare_de_gene_sets_plots, dependson='get_de_gene_sets', echo=FALSE, fig.width=4, fig.height=3}
+```{r show_upsetr_compare_de_gene_sets_plots}
+#| dependson='get_de_gene_sets',
+#| echo=FALSE,
+#| fig.height=3,
+#| fig.width=4
+
 fromList(de_gene_sets) %>%
   upset()
 ```
 
 A table of [gene responses in each comparison](files/de_gene_sets_comparison.xlsx) is created and a snippet shown below.
 
-```{r show_de_gene_sets, dependon='get_de_gene_sets'}
+```{r show_de_gene_sets}
+#| dependon='get_de_gene_sets'
+
 de_gene_sets %>%
   ldply(.id='comparison', data.frame) %>%
   set_names(c('comparison', 'id')) %>%
@@ -950,20 +1002,22 @@ de_gene_sets %>%
   write.xlsx(file='files/de_gene_sets_comparison.xlsx') %>%
   sample_n(size=15) %>%
   arrange(gene_name) %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'))
+  kable(format='markdown')
 ```
-
-<!--  -->
 
 ### MA plots
 
 These plots show the distribution of genes in the data by their `baseMean` (mean expression across all datasets in the `dds`) and their shrunk log2FoldChange in a contrast. Genes considered as differentially expressed are significant when `alpha==`r percent(target_alpha)``.
 
-```{r set_ma_plot_labels, dependson='set_validated_genes'}
+```{r set_ma_plot_labels}
+#| dependson='set_validated_genes'
+
 ma_plot_labels <- validated_genes
 ```
 
-```{r get_ma_plots, dependson=c('collect_results', 'set_ma_plot_labels')}
+```{r get_ma_plots}
+#| dependson=c('collect_results', 'set_ma_plot_labels')
+
 make_ma_plot <- function(results, lfc='shrunk.log2FoldChange', maxLFC=3, labels)
   results %>%
     as.data.frame() %>%
@@ -994,23 +1048,30 @@ all_dds %>%
   llply(make_ma_plot, lfc='shrunk.log2FoldChange', maxLFC=3, labels=ma_plot_labels) -> plots_list
 ```
 
-{{< tabs "show_ma_plots" >}}
-```{r show_ma_plots, dependson='get_ma_plots', echo=FALSE, results='asis'}
-for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  plots_list[[i]] %>% resize_and_show(width=3)
-  cat('{{< /tab >}}')
-}
-```
-{{< /tabs >}}
+```{r show_ma_plots}
+#| dependson='get_ma_plots',
+#| echo=FALSE,
+#| results='asis'
 
-<!--  -->
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% resize_and_show(width=3)
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ### Heatmaps of significant features
 
 The normalised read counts (via the `DESeq2::counts(norm=TRUE)` function) for all datasets are plotted here for the differentially expressed genes in a comparison. The expression is clustered by rows (genes) and columns (datasets).
 
-```{r get_de_features_heatmaps, dependson='collect_results'}
+```{r get_de_features_heatmaps}
+#| dependson='collect_results'
+
 make_de_features_heatmap <- function(dds, annotations=NULL, opts=list()) {
   colData(dds) %>%
     as.data.frame() %>%
@@ -1045,23 +1106,30 @@ all_dds %>%
 
 Heatmaps are plotted here for comparisons with at least `r min_de_features` significant feature(s).
 
-{{< tabs "show_de_features_heatmaps" >}}
-```{r show_de_features_heatmaps, dependson='get_de_features_heatmaps', echo=FALSE, results='asis'}
-for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  plots_list[[i]] %>% resize_and_show(width=2, orientation='p')
-  cat('{{< /tab >}}')
-}
-```
-{{</ tabs >}}
+```{r show_de_features_heatmaps}
+#| dependson='get_de_features_heatmaps',
+#| echo=FALSE,
+#| results='asis'
 
-<!--  -->
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% resize_and_show(width=2, orientation='p')
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ### Grouped expression changes
 
 Here, the [DEGreport package][degreport bioc] is used to cluster expression profiles of the genes identified in the LRT test(s).
 
-```{r get_degPatterns, dependson='collect_results'}
+```{r get_degPatterns}
+#| dependson='collect_results'
+
 get_degPatterns <- function(dds, x_variable) {
   metadata(dds) %>%
     pluck('results') %>%
@@ -1088,7 +1156,9 @@ all_dds[lrt_comparisons] %<>%
 
 The following function extracts the normalised expression profiles from the `degPatterns` result and plots each cluster across datasets.
 
-```{r get_degPatterns_plots, dependson='get_degPatterns'}
+```{r get_degPatterns_plots}
+#| dependson='get_degPatterns'
+
 make_degPattern_cluster_plot <- function(data) {
   data %>%
     pluck('summarise') %>%
@@ -1124,17 +1194,22 @@ all_dds %>%
   llply(make_degPattern_cluster_plot) -> plots_list
 ```
 
-{{< tabs "show_degPatterns_plots" >}}
-```{r show_degPatterns_plots, dependson=c('get_degPatterns_plots'), echo=FALSE, results='asis'}
-for(i in names(plots_list)) {
-  sprintf('{{< tab "%s" >}}', i) %>% cat()
-  plots_list[[i]] %>% resize_and_show(width=2.5, clip=FALSE)
-  cat('{{< /tab >}}')
-}
-```
-{{< /tabs >}}
+```{r show_degPatterns_plots}
+#| dependson='get_degPatterns_plots',
+#| echo=FALSE,
+#| results='asis'
 
-<!--  -->
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf(fmt='{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% resize_and_show(width=2.5, clip=FALSE)
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
 
 ## Data exports
 
@@ -1163,7 +1238,10 @@ Normalised read counts (using the `DESeq2::counts(norm=TRUE)` function) are prov
 Remember that the LRT test uses all of the datasets in a single test so the reported log2FoldChange/change direction (etc) should be interpreted with care.
 {{< /callout >}}
 
-```{r write_xlsx, dependson='collect_results', echo=FALSE}
+```{r write_xlsx}
+#| dependson='collect_results',
+#| echo=FALSE
+
 all_dds %>%
   llply(.parallel=TRUE, function(dds) {
     colData(dds) %>%
@@ -1203,13 +1281,13 @@ all_dds %>%
   write.xlsx(file='files/differentially_expressed_results.xlsx')
 ```
 
-<!--  -->
-
 ### Clusters Excel file
 
 The [DEGreport cluster table](files/degreport_clusters.xlsx) is written to `xlsx` by the following chunk.
 
-```{r write_degreport_xlsx, dependson='get_degPatterns'}
+```{r write_degreport_xlsx}
+#| dependson='get_degPatterns'
+
 all_dds %>%
   llply(metadata) %>%
   llply(pluck, 'DEGreport') %>%
@@ -1231,13 +1309,15 @@ all_dds %>%
   write.xlsx(file='files/degreport_clusters.xlsx')
 ```
 
-<!--  -->
-
 ### MetaCore
 
 A [`zip` archive of `tsv` files](files/metacore.zip) is provided that can be uploaded to [MetaCore][metacore]. Ensembl gene identifiers and shrunken log2FoldChange values are provided.
 
-```{r write_metacore, dependson='collect_results', results='hide', echo=FALSE}
+```{r write_metacore}
+#| dependson='collect_results',
+#| echo=FALSE,
+#| results='hide'
+
 write_metacore_file <- function(results, output_file_root, out_path='scratch/metacore') {
   if(nrow(results)==0)
     return()
@@ -1283,19 +1363,20 @@ system(command='cd scratch && zip - metacore/*tsv > ../files/metacore.zip')
 
 > Quantified gene expression tables were loaded into R (`r R.version[c('major','minor')] %>% unlist() %>% str_c(collapse='.')`) using the tximport package (`r packageVersion('tximport')`, {{< textcite "https-doi-org-10-18129-b-9-bioc-tximport" >}}). Differentially expressed genes were identified using the DESeq2 package (`r packageVersion('DESeq2')`, {{< textcite "love-2014" >}}) and DEGreport (`r packageVersion('DEGreport')`, {{< textcite "https-doi-org-10-18129-b-9-bioc-degreport" >}}) subsequently used to cluster expression profiles of significant genes in an LRT test.
 
-<!-- include a references section -->
-
-```{r show_list_references, opts.label='batch_chunk', child=system.file('chunks/list_references.Rmd', package='project.notes.tools')}
+<!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r write_bibliography}
+#| bibliography_doi=c(deseq2='10.1186/s13059-014-0550-8',
+#|                    deseq2_bioc='10.18129/B9.bioc.DESeq2',
+#|                    tximport='10.12688/f1000research.7563.1',
+#|                    tximport_bioc='10.18129/B9.bioc.tximport',
+#|                    degreport='10.18129/B9.bioc.DEGreport',
+#|                    upsetr='10.1093/bioinformatics/btx364'),
+#| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 
 <!-- include a session information section -->
-
-```{r record_saved_objects, opts.label='batch_chunk'}
-#! names of object to be included in the table of hashes
-saved_objects <- c('txi', 'all_DESeqResults', 'all_dds', 'results_summary')
+```{r show_session_information}
+#| child=system.file('children/session_information.Rmd', package='project.notes.tools'),
+#| opts.label='batch_chunk',
+#| saved_objects=c('txi', 'all_DESeqResults', 'all_dds', 'results_summary')
 ```
-
-```{r show_session_information, opts.label='batch_chunk', child=system.file('chunks/session_information.Rmd', package='project.notes.tools')}
-```
-
-<!-- end of session information -->

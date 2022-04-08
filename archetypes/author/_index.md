@@ -2,6 +2,8 @@
 # display name
 title: {{ .File.Path | path.Dir | path.Base | humanize | title }}
 
+# todo: include this only when the user is the superuser (or if it is the first author)
+
 # is this the primary user of the site?
 superuser: true
 

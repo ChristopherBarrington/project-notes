@@ -129,7 +129,7 @@ save(genome)
 
 genome %>%
   enframe(name='Attribute', value='Value') %>%
-  kable('markdown')
+  kable(format='markdown')
 ```
 
 <!--  -->
@@ -234,7 +234,7 @@ project_sample_sheet %>%
 #| echo=FALSE}
 
 head(project_sample_sheet, n=10) %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'))
+  kable(format='markdown')
 ```
 
 <!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->

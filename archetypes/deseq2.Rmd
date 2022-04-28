@@ -108,9 +108,7 @@ First, the gene counts are loaded from RSEM using the [`tximport`][tximport doi]
 ```{r make_txi}
 file.path(project_path, 'analysis', 'nfcore-rnaseq', 'results', 'star_rsem') %>%
   list.files(pattern='*.genes.results', full.names=TRUE) %>%
-  set_names() %>%
-  set_names(basename) %>%
-  set_names(str_remove, '.genes.results') %>%
+  set_names(remove_extension) %>%
   tximport(type='rsem', txIn=FALSE) %>%
   modify_at('length', add, e2=1) -> txi
 
@@ -157,20 +155,20 @@ The sample sheet was defined in [{{< post-title "create-project-data" >}}][proje
 
 ```{r text_n_rows_project_sample_sheet}
 #| echo=FALSE,
-#|results='asis'
+#| results='asis'
 
 project_sample_sheet %>%
   nrow() %>%
   when(.>10~comma(.) %>% sprintf(fmt='The first 10 (of %s) rows of the `project_sample_sheet` are shown below.'),
        TRUE~'The complete `project_sample_sheet` is shown below.') %>%
-  cat()
+  cat(sep='\n')
 ```
 
 ```{r show_project_sample_sheet}
 #| echo=FALSE
 
 head(project_sample_sheet, n=10) %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'))
+  kable(format='markdown')
 ```
 
 ## Dataset relationships
@@ -326,14 +324,17 @@ make_covariate_association <- function(dds, assay='rlog', labels=metadata(dds)$l
 
 These functions can now be used with subsets of the `dds` object.
 
-{{< callout danger >}}
+{{< callout wip >}}
 These tabs need to be generalised! Nested list of plot objects?
 {{< /callout >}}
 
 {{< tabs "pca_plots" >}}
+```{r pca_plots-All_datasets}
+#| dependson=c('make_dds', 'pca_plot_functions'),
+#| echo=FALSE
 
-{{< tab "All datasets" >}}
-```{r pca_plots_all_datasets_scatter, dependson=c('make_dds', 'pca_plot_functions'), echo=FALSE}
+opts_current$get('label') %>% str_remove('.*-') %>% str_replace_all('_', ' ') %>% sprintf(fmt='{{< tab "%s" >}}') %>% cat(sep='\n')
+
 make_covariate_association(dds=dds, assay='vst', labels={c('col1', 'col2', 'col3', 'col4') %>% rev()}) %>%
   resize_and_show(height={pluck(.$data, 'Covariate') %>% unique() %>% length()}*0.2,
                   aspect={pluck(.$data, 'PC') %>% unique() %>% length()}/{pluck(.$data, 'Covariate') %>% unique() %>% length()},
@@ -342,24 +343,30 @@ make_covariate_association(dds=dds, assay='vst', labels={c('col1', 'col2', 'col3
 assay(dds, 'vst') %>%
   make_pca_plot(dds=dds, shape='col1:col2', colour='col3', label=NULL) %>%
   resize_and_show(size=2)
-```
-{{< /tab >}}
 
-{{< tab "SUBSET datasets" >}}
-```{r pca_plots_SUBSET_datasets_scatter, dependson=c('make_dds', 'pca_plot_functions'), echo=FALSE}
+cat('{{< /tab >}}', sep='\n')
+```
+
+```{r pca_plots-SUBSET_datasets}
+#| dependson=c('make_dds', 'pca_plot_functions'),
+#| echo=FALSE
+
+this_col1 <- 'SOMETHING'
+
+opts_current$get('label') %>% str_remove('.*-') %>% str_replace_all('_', ' ') %>% sprintf(fmt='{{< tab "%s" >}}') %>% cat(sep='\n')
+
 dds[,dds$col1=='SOMETHING'] %>% 
   make_covariate_association(assay='vst', labels={c('col1', 'col2', 'col3', 'col4') %>% rev()}) %>%
   resize_and_show(height={pluck(.$data, 'Covariate') %>% unique() %>% length()}*0.2,
                   aspect={pluck(.$data, 'PC') %>% unique() %>% length()}/{pluck(.$data, 'Covariate') %>% unique() %>% length()},
                   clip=FALSE)
 
-dds[,dds$col1=='SOMETHING'] %>% 
-  assay(i='vst') %>%
+dds[,dds$col1==this_col1] %>% assay(i='vst') %>%
   make_pca_plot(dds=dds, shape='col2:col3', colour='col4', label=NULL) %>%
   resize_and_show(size=2)
-```
-{{< /tab >}}
 
+cat('{{< /tab >}}', sep='\n')
+```
 {{< /tabs >}}
 
 ## Collect results of differential expression
@@ -546,17 +553,24 @@ data(mart)
 data.frame(gene_name=c('gene1', 'gene2', 'gene3'),
            ensembl_gene_id=c('ENS_ID1', 'ENS_ID2', 'ENS_ID3')) -> validated_genes
 
-validated_genes %<>%
-  when(class(.)=='character'~getBM(attributes=c('external_gene_name', 'ensembl_gene_id'), filters='external_gene_name', mart=mart),
+validated_genes %>%
+  when(class(.)=='character'~getBM(attributes=c('external_gene_name', 'ensembl_gene_id'), filters='external_gene_name', values=validated_genes, mart=mart),
        TRUE~.) %>%
   when(nrow(.)==0~c(),
-       TRUE~deframe(.))
+       TRUE~deframe(.)) -> validated_genes
+```
+
+```{r show_validated_genes}
+#| dependson='set_validated_genes',
+#| echo=FALSE
+
+validated_genes %>% enframe(value='Ensembl ID', name='Gene name') %>% kable(format='markdown')
 ```
 
 These plots show the normalised expression counts (via the `DESeq2::counts(norm=TRUE)` function) in all comparisons defined above.
 
 ```{r get_feature_count_plots}
-#| dependson=c('set_validated_genes','collect_results'),
+#| dependson=c('set_validated_genes', 'collect_results'),
 #| eval=length(validated_genes)>0
 
 plot_feature_counts <- function(dds, features, x) {
@@ -576,7 +590,7 @@ plot_feature_counts <- function(dds, features, x) {
     rownames_to_column('ensembl_gene_id') %>%
     gather(key=Sample.limsid, value=value, -ensembl_gene_id) %>%
     left_join(y=enframe(features, name='external_gene_name', value='ensembl_gene_id'), by='ensembl_gene_id') %>%
-    left_join(y=project_sample_sheet, by='Sample.limsid') %>%
+    left_join(y={colData(dds) %>% as.data.frame()}, by='Sample.limsid') %>%
     left_join(y={metadata(dds) %>% pluck('results') %>% select(ensembl_gene_id, outcome)}, by='ensembl_gene_id') %>%
     mutate(facet_group=sprintf(fmt='%s [%s]', external_gene_name, outcome)) -> data
 
@@ -612,12 +626,14 @@ all_dds %>%
 #| eval=length(validated_genes)>0,
 #| results='asis'
 
-cat('{{< tabs "show_feature_count_plots" >}}', sep='\n')
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
 for(i in names(plots_list)) {
   sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
   plots_list[[i]] %>% resize_and_show(height=2, orientation='p')
   cat('{{< /tab >}}', sep='\n')
 }
+
 cat('{{< /tabs >}}', sep='\n')
 ```
 
@@ -633,7 +649,9 @@ cat('_*No validated genes were supplied!*_', sep='\n')
 
 In the following plot, the variability in gene expression is plotted from the data (in the 'dispersion' panel) and after fitting in the 'final dispersion' panel. The variability observed for a gene (grey dots) is shrunk to the genome wide mean (purple line), helping to account for the comparatively low number of replicate that are typical for -seq projects. The final dispersion estimates are closer to the genome-wide mean and should show decreasing variability with increasing gene expression counts.
 
-```{r function_to_make_dispersion_plots}
+```{r get_dispersion_plots}
+#| dependson=c('collect_results', 'function_to_make_dispersion_plots')
+
 make_dispersion_plot <- function(dds)
   data.frame(gene_name=rownames(dds),
              basemean=mcols(dds)$baseMean,
@@ -659,14 +677,17 @@ make_dispersion_plot <- function(dds)
       facet_wrap(~dispersion_type, scales='fixed') +
       theme(aspect.ratio=1,
             plot.title=element_text(hjust=0.5))
+
+all_dds %>%
+  llply(make_dispersion_plot) -> plots_list
 ```
 
-```{r show_dispersion_plots_for_each_comparison}
-#| dependson=c('collect_results', 'function_to_make_dispersion_plots'),
+```{r show_dispersion_plots}
+#| dependson='get_dispersion_plots',
 #| echo=FALSE,
 #| results='asis'
 
-cat('{{< tabs "show_feature_count_plots" >}}', sep='\n')
+cat('{{< tabs "show_dispersion_plots" >}}', sep='\n')
 for(i in names(all_dds)) {
   sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
   make_dispersion_plot(dds=all_dds[[i]]) %>% resize_and_show(width=2)
@@ -723,7 +744,7 @@ opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
 # show the plots
 for(i in names(plots_list)) {
   sprintf('{{< tab "%s" >}}', i) %>% cat(sep='\n')
-  {pluck(plot_list, i, 'density') + pluck(plots_list, i, 'boxplot') + plot_layout(widths=unit(3,'in'), height=unit(3/1.6, 'in'))} %>% show()
+  {pluck(plots_list, i, 'density') + pluck(plots_list, i, 'boxplot') + plot_layout(widths=unit(3,'in'), height=unit(3/1.6, 'in'))} %>% show()
   cat('{{< /tab >}}', sep='\n')
 }
 
@@ -869,11 +890,13 @@ make_number_of_different_features_plot <- function(results_df)
     group_by(comparison, alpha, direction=str_remove(outcome, '\\*$')) %>%
     summarise(n=n()) %>%
     spread(key=direction, value=n) %>%
+    (function(x) {
+      cols <- c(up=0, down=0)
+      add_column(x, !!!cols[setdiff(names(cols), names(x))])}) %>%
     mutate(total=down+up) %>%
     gather(key=direction, value=n, down, up, total) %>%
     as.data.frame() %>%
-    mutate(alpha=scientific(alpha),
-           alpha=factor(alpha, levels={alpha %>% unique() %>% as.numeric() %>% sort() %>% scientific()}),
+    mutate(alpha={alpha %>% multiply_by(100) %>% sprintf(fmt='%s%%') %>% factor() %>% fct_relevel(mixedsort)},
            direction=factor(direction, levels=c('down','up','total')) %>% fct_relabel(str_to_title),
            label={n %>% as.integer() %>% comma(accuracy=1)}) %>%
     ggplot() +
@@ -958,37 +981,92 @@ all_dds %>%
       filter(str_detect(outcome, '\\*$')) %>%
       select(ensembl_gene_id, outcome) %>%
       left_join(y={dds %>% metadata() %>% pluck('gene_information') %>% select(ensembl_gene_id, gene_name)}, by='ensembl_gene_id') %>%
+      distinct() %>%
       append(list(sep='%')) %>%
       do.call(what=str_c)) -> de_gene_sets
 ```
 
-```{r show_venn_compare_de_gene_sets_plots}
-#| dependson='get_de_gene_sets',
-#| fig.height=3,
-#| fig.width=3
+### Venn diagrams
+
+{{< callout notice >}}
+The VennDiagram package does not make label arrangement easy - the labels will be likely cut off!
+{{< /callout >}}
+
+```{r get_venn_compare_de_gene_sets_plots}
+#| dependson='get_de_gene_sets'
 
 palette <- brewer.pal(name='Dark2', n=3)
 category_distances <- c(0.1, 0.1, 0.05)
 
-venn.diagram(x=de_gene_sets,
-             filename=NULL,
-             cat.fontface='bold',
-             cat.col=palette,
-             cat.dist=category_distances,
-             col=palette,
-             fill=sapply(X=palette, FUN=alpha, alpha=0.3),
-             margin=0.1) %>%
-  show_newpage_grid()
+outer(c('contrast', 'name'), c('1', '2', '3'), paste, sep='') %>% 
+  as.vector() %>%
+  set_names() %>%
+  llply(function(comparison_group)
+    venn.diagram(x=de_gene_sets[startsWith(x=names(de_gene_sets), prefix=comparison_group)],
+                 filename=NULL,
+                 cat.cex=0.7,
+                 cat.col=palette,
+                 cat.dist=category_distances,
+                 cat.just=list(c(0.5,0.5), c(0,0.5), c(1,0.5)),
+                 cat.fontface='bold',
+                 col=palette,
+                 fill=sapply(X=palette, FUN=alpha, alpha=0.3),
+                 margin=0.1,
+                 disable.logging=TRUE)) -> plots_list
 ```
 
-```{r show_upsetr_compare_de_gene_sets_plots}
-#| dependson='get_de_gene_sets',
+```{r show_venn_compare_de_gene_sets_plots}
+#| dependson='get_venn_compare_de_gene_sets_plots',
 #| echo=FALSE,
+#| fig.height=3,
+#| fig.width=3,
+#| results='asis'
+
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf(fmt='{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% show_newpage_grid()
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
+```
+
+### UpSet plots
+
+```{r get_upsetr_compare_de_gene_sets_plots}
+#| dependson='get_de_gene_sets',
 #| fig.height=3,
 #| fig.width=4
 
-fromList(de_gene_sets) %>%
-  upset()
+outer(c('contrast', 'name'), c('1', '2', '3'), paste, sep='') %>% 
+  as.vector() %>%
+  set_names() %>%
+  llply(str_c, ' MTG8') %>%
+  llply(function(comparison_group)
+    fromList(de_gene_sets[startsWith(x=names(de_gene_sets), prefix=comparison_group)]) %>%
+      upset()) -> plots_list
+```
+
+```{r show_upsetr_compare_de_gene_sets_plots}
+#| dependson='get_upsetr_compare_de_gene_sets_plots',
+#| echo=FALSE,
+#| fig.height=4,
+#| fig.width=6,
+#| results='asis'
+
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
+# show the plots
+for(i in names(plots_list)) {
+  sprintf(fmt='{{< tab "%s" >}}', i) %>% cat(sep='\n')
+  plots_list %>% pluck(i) %>% show()
+  cat('{{< /tab >}}', sep='\n')
+}
+
+cat('{{< /tabs >}}', sep='\n')
 ```
 
 A table of [gene responses in each comparison](files/de_gene_sets_comparison.xlsx) is created and a snippet shown below.
@@ -1031,11 +1109,11 @@ make_ma_plot <- function(results, lfc='shrunk.log2FoldChange', maxLFC=3, labels)
       aes(x=baseMean, y=y, shape=abs(y)>maxLFC, colour=padj<=alpha) +
       labs(colour='Significant', x='baseMean', y=lfc) +
       geom_point(size=0.5, alpha=0.5) +
-      geom_text_repel(data=filter(., !is.na(label)), mapping=aes(label=label), box.padding=0.5, max.overlaps=Inf, colour='black') +
+      geom_text_repel(data=filter(., !is.na(label)), mapping=aes(label=label), box.padding=0.5, max.overlaps=Inf, colour='black', size=2) +
       scale_x_continuous(trans='log10', breaks=major_log_breaks(), labels=numeric_to_si) +
       scale_y_continuous(breaks={major_log_breaks(base=2) %>% c(.*-1, .) %>% c(0)}, limits=maxLFC*c(-1,1), oob=squish) +
       scale_shape_manual(values=c(`TRUE`=17, `FALSE`=16), labels=c(`FALSE`='Outside', `FALSE`='Inside')) +
-      scale_colour_manual(values=c(`TRUE`='#E41A1C', `FALSE`='#999999'), labels=c(`TRUE`='p≤alpha', `FALSE`='p≥alpha')) +
+      scale_colour_manual(values=c(`TRUE`='#E41A1C', `FALSE`='#999999'), labels=c(`TRUE`='p<alpha', `FALSE`='p>alpha')) +
       annotation_logticks(sides='b', base=10, outside=TRUE, short=unit(0.4,'mm'), mid=unit(0.7,'mm'), long=unit(1,'mm')) +
       annotation_logticks(sides='l', base=2, outside=TRUE, short=unit(0.4,'mm'), mid=unit(0.7,'mm'), long=unit(1,'mm')) +
       coord_cartesian(clip=FALSE) +
@@ -1219,8 +1297,8 @@ cat('{{< /tabs >}}', sep='\n')
 
 Excel workbooks are available for the `alpha=`r target_alpha`` results:
 
-* [significantly different features](files/dds_results.xlsx) (`dds_results`)
-* [all features in the analysis](files/all_results.xlsx) (`all_results`) (this may be a very big file!)
+* [significantly different features](files/differentially_expressed_results.xlsx)
+* [all features in the analysis](files/all_results.xlsx) (`r file.size('files/all_results.xlsx') %>% utils:::format.object_size(units='auto')`)
 
 (It may post a warning due to the contrast names containing reserved characters or being too long that can be ignored).
 
@@ -1248,7 +1326,6 @@ all_dds %>%
   llply(.parallel=TRUE, function(dds) {
     colData(dds) %>%
       as.data.frame() %>%
-      mutate(Sample.Name=str_c(genotype, culture, sep='.')) %>%
       select(Sample.limsid, Sample.Name) %>%
       deframe() -> lims2sample
 
@@ -1367,12 +1444,12 @@ system(command='cd scratch && zip - metacore/*tsv > ../files/metacore.zip')
 
 <!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r write_bibliography}
-#| bibliography_doi=c(deseq2='10.1186/s13059-014-0550-8',
-#|                    deseq2_bioc='10.18129/B9.bioc.DESeq2',
-#|                    tximport='10.12688/f1000research.7563.1',
-#|                    tximport_bioc='10.18129/B9.bioc.tximport',
-#|                    degreport='10.18129/B9.bioc.DEGreport',
-#|                    upsetr='10.1093/bioinformatics/btx364'),
+#| doi=c(deseq2='10.1186/s13059-014-0550-8',
+#|       deseq2_bioc='10.18129/B9.bioc.DESeq2',
+#|       tximport='10.12688/f1000research.7563.1',
+#|       tximport_bioc='10.18129/B9.bioc.tximport',
+#|       degreport='10.18129/B9.bioc.DEGreport',
+#|       upsetr='10.1093/bioinformatics/btx364'),
 #| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 

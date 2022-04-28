@@ -1,5 +1,5 @@
 ---
-title: {{ default (.File.Path | path.Dir | path.Base | replaceRE "^20\\d+-\\d+-\\d+-" "" | humanize | title) (getenv "TITLE") }}
+title: {{ default "Gene set enrichment with clusterProfiler and GSEA" (getenv "TITLE") }}
 weight: 2
 
 categories:
@@ -54,13 +54,8 @@ library(DESeq2)
 
 <!-- set a ggplot theme to use as a base in the workbook -->
 ```{r define_global_ggplot_theme}
+#| file=system.file('chunks/ggplot_theme.r', package='project.notes.tools'),
 #| opts.label='batch_chunk'
-
-(theme_bw() +
- theme(text=element_text(size=10, colour='black'),
-       panel.grid.minor=element_blank(),
-       strip.background=element_blank())) %>%
-theme_set()
 ```
 
 <!-- any final things to set for this workbook -->
@@ -71,10 +66,8 @@ theme_set()
 <!-- define shortcut links to other reports here for ease and reuse -->
 ```{r write_slugs}
 #| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
-#| slugs=list(deseq2='deseq2')
+#| slugs=list(`deseq2 post`='deseq2')
 ```
-
-[CRICK]: https://www.crick.ac.uk
 
 [clusterprofiler bioc]: https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html
 [clusterprofiler do]: http://yulab-smu.top/clusterProfiler-book/chapter4.html#enrichdo-function
@@ -139,7 +132,7 @@ significant_results %>%
   tally() %>%
   spread(key=outcome, value=n) %>%
   mutate(total=up+down) %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'),
+  kable(format='markdown',
         format.args=list(big.mark=','))
 ```
 
@@ -190,8 +183,6 @@ getBM(attributes=c('ensembl_gene_id','entrezgene'), mart=mart) %>%
 
 The `biomaRt` object connects to ``r mart@host %>% str_remove('/biomart/martservice')``.
 
-<!--  -->
-
 ### Define enrichment test functions
 
 A function to test for enrichment of [Gene Ontology terms][clusterprofiler go], [KEGG pathways][clusterprofiler kegg] or [Disease Ontology][clusterprofiler do] are defined here. These functions accept two lists of Ensembl IDs: one gene set and one background (or `universe`). The results returned are with a 1% significance threshold.
@@ -229,8 +220,6 @@ test_DO_enrichment <- function(gene_ids, universe, ont='DO', cutoff=0.01, ...)
            qvalueCutoff=cutoff)
 ```
 
-<!--  -->
-
 ### Prepare for Slurm distribution
 
 The enrichment tests are run in parallel using using `rslurm` to distribute each comparison across CAMP. This is required due to an error when running in parallel local threads where multiple threads accessing the `OrgDb` cause an exception (`database disk image is malformed`).
@@ -263,8 +252,6 @@ run_on_slurm <- function(gene_set, enrichment_function, cutoff, ontology_type, i
 }
 ```
 
-<!--  -->
-
 #### Define enrichment test parameters
 
 Each combination of test parameters is produced by `crossing()` the different parameter values that will be passed to the previously defined test functions. The 'gene_set' variable dictates which genes are tested. The parameter combinations (rows) are shuffled so that the computational cost of analyses are randomly distributed among nodes.
@@ -282,14 +269,13 @@ crossing(gene_set=names(de_genes),
   sample_frac(size=1) -> enrichment_test_parameters
 ```
 
-<!--  -->
-
 ### Run enrichment tests
 
 Using the above functions and parameters, the computation is distributed across CAMP. The Slurm job array is submitted (see note) and the results loaded once the job has finished.
 
 ```{r run_enrichment_tests}
 #| dependson=c('get_ensembl_id_conversions', 'function_to_run_on_slurm', 'define_enrichment_test_parameters'),
+#| eval=!file.exists('scratch/slr_job.run_enrichment_tests.rds'),
 #| results='hide'
 
 slurm_apply(f=run_on_slurm,
@@ -314,13 +300,11 @@ if(file.exists('scratch/slr_job.run_enrichment_tests.rds')) {
   readRDS('scratch/slr_job.run_enrichment_tests.rds') %>%
     {.[c('jobname', 'jobid', 'nodes')]} %>%
     as.data.frame() %>%
-    kable(format=if_else(interactive(), 'markdown', 'html'), align='lrr')
+    kable(format='markdown', align='lrr')
 } else {
   knit_exit('no slurm job found!')
 }
 ```
-
-<!--  -->
 
 ### Load enrichment test results
 
@@ -366,25 +350,31 @@ system(command='cd scratch && zip - enrichment_results/*xlsx > ../files/enrichme
 
 A summary of the number of enriched terms in each test, comparison and gene set is shown in the following table:
 
-{{< tabs "show_enrichment_test_results_summary_tables" >}}
 ```{r show_enrichment_test_results_summary_tables}
 #| dependson='load_enrichment_test_results',
 #| echo=FALSE,
 #| results='asis'
 
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
+
 enrichment_results %>%
   group_by(enrichment_function, gene_set) %>%
   tally() %>%
   separate(col=gene_set, into=c('Comparison', 'Tx direction'), sep='\\.') %>%
-  plyr::dlply(~enrichment_function, select, -enrichment_function) -> tables_list
+  spread(key=tx_direction, value=n, fill=0) %>%
+  dlply(~enrichment_function, select, -enrichment_function) -> tables_list
 
 for(i in names(tables_list)) {
-  str_replace_all(i, '_', ' ') %>% str_to_title() %>% sprintf(fmt='{{< tab "%s" >}}') %>% cat()
-  kable(x=tables_list[[i]], format=if_else(interactive(), 'markdown', 'html')) %>% show()
-  cat('{{< /tab >}}')
+  str_replace_all(i, '_', ' ') %>% str_to_title() %>% sprintf(fmt='{{< tab "%s" >}}') %>% cat(sep='\n')
+  tables_list %>%
+    pluck(i) %>%
+    kable(format='markdown',
+          format.args=list(big.mark=',')) %>%
+    show()
+  cat('{{< /tab >}}', sep='\n')
 }
+cat('{{< /tabs >}}', sep='\n')
 ```
-{{< /tabs >}}
 
 In the following excerpt table, the top 5 enriched terms ranked by adjusted p-value are shown for each contrast/direction combination. RNA-seq changes that were not direction-filtered (the 'changed' set) are not shown in the table but are included in [the Excel workbooks](files/enrichment_results.zip).
 
@@ -395,12 +385,10 @@ In the following excerpt table, the top 5 enriched terms ranked by adjusted p-va
 enrichment_results %>%
   arrange(p.adjust) %>%
   filter(str_detect(gene_set, '\\.changed$')) %>%
-  plyr::ddply(~enrichment_function+gene_set, head, n=5) %>%
+  ddply(~enrichment_function+gene_set, head, n=5) %>%
   select(gene_set, enrichment_function, 1:4) %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'))
+  kable(format='markdown')
 ```
-
-<!--  -->
 
 ## Gene set enrichment analysis
 
@@ -420,7 +408,7 @@ First, the gene sets for database version 7.4 are sought from disk, and the gene
 file.path('/camp/stp/babs/working/barrinc', 'db', 'msigdb') %>%
   list.files(path=., pattern='v7.4.symbols.gmt') %>%
   data.frame(`gene set`=.) %>%
-  kable(format=if_else(interactive(), 'markdown', 'html'))
+  kable(format='markdown')
 ```
 
 ```{r get_msigdb_gene_sets}
@@ -462,7 +450,7 @@ The `ranked_results` is a list of comparison results, each of which is a named v
 
 ranked_results %>%
   head(n=3) %>%
-  lapply(headtail, n=5)
+  lapply(function(x, n) c(head(x, n=n), tail(x, n=n)), n=5)
 ```
 
 GSEA is now run using `fgsea` for every pathway set and comparison combination in a nested list in parallel. A [zip file of Excel workbooks](files/fgsea_results.xlsx.zip) is created that contains a workbook for each pathway set, each of which contains a worksheet for each comparison. 
@@ -499,50 +487,50 @@ The results from the `fgsea` analysis are plotted below.
 
 First, a summary plot of the top pathways for up- or down-regulated (not necessarily significantly so) genes. The top 6 pathways at either extreme of the results ranked by ES are shown below.
 
-{{< callout "wip" >}}
+{{< callout wip >}}
 This needs some/extensive prettification.
 {{< /callout >}}
 
 ```{r show_fgsea_pathways_table_plots}
 #| dependson='run_fgsea',
 #| echo=FALSE,
-#| fig.width=8.5,
 #| fig.height=6,
+#| fig.width=8.5,
 #| results='asis'
 
-cat('{{< tabs "show_fgsea_pathways_table_plots" >}}')
+opts_current$get('label') %>% sprintf(fmt='{{< tabs "%s" >}}') %>% cat(sep='\n')
 
 for(msigdb_pathway_set in names(fgsea_results)) {
-  sprintf(fmt='{{< tab "%s" >}}', msigdb_pathway_set) %>% cat()
-  sprintf(fmt='{{< tabs "show_fgsea_pathways_table_plots-%s" >}}', msigdb_pathway_set) %>% cat()
+  sprintf(fmt='{{< tab "%s" >}}', msigdb_pathway_set) %>% cat(sep='\n')
+  sprintf(fmt='{{< tabs "show_fgsea_pathways_table_plots-%s" >}}', msigdb_pathway_set) %>% cat(sep='\n')
 
-  for(comparison in names(fgsea_results[[msigdb_pathway_set]])) {
-    sprintf(fmt='{{< tab "%s" >}}', comparison) %>% cat()
+  for(comparison in {fgsea_results %>% pluck(msigdb_pathway_set) %>% names()}) {
+    sprintf(fmt='{{< tab "%s" >}}', comparison) %>% cat(sep='\n')
 
     fgsea_results %>%
       pluck(msigdb_pathway_set, comparison) -> fgsea_result
 
     fgsea_result %>%
       arrange(desc(ES)) %>%
-      helpr::headtail(n=6) %>%
+      headtail(n=6) %>%
       arrange(padj) %>%
       pluck('pathway') %>%
-      magrittr::extract(msigdb_pathway_sets[[msigdb_pathway_set]], .) %>%
+      magrittr::extract(x={msigdb_pathway_sets %>% pluck(msigdb_pathway_set)}, table=.) %>%
       plotGseaTable(pathways=.,
-                    stats=ranked_results[[comparison]],
+                    stats={ranked_results %>% pluck(comparison)},
                     fgseaRes=fgsea_result,
                     gseaParam=1,
                     colwidths=c(4,2,1,0,1), render=FALSE) %>%
       show_newpage_grid()
 
-    cat('{{< /tab >}}')
+    cat('{{< /tab >}}', sep='\n')
   }
 
-  cat('{{< /tabs >}}')
-  cat('{{< /tab >}}')
+  cat('{{< /tabs >}}', sep='\n')
+  cat('{{< /tab >}}', sep='\n')
 }
 
-cat('{{< /tabs >}}')
+cat('{{< /tabs >}}', sep='\n')
 ```
 
 Enrichment plots for the top 6 most extreme ES results are shown below. A [zip file of enrichment plots](files/output_fgsea_enrichment_plots.zip) for every pathway set and comparison combination is made because there are too many plots to include here.
@@ -596,37 +584,38 @@ system(command='cd scratch && zip -r - output_fgsea_enrichment_plots > ../files/
 #| echo=FALSE,
 #| results='asis'
 
-cat('{{< tabs "show_fgsea_enrichment_plots" >}}')
+cat('{{< tabs "show_fgsea_enrichment_plots" >}}', sep='\n')
 
 for(msigdb_pathway_set in {plots_list %>% names()}) {
-  sprintf(fmt='{{< tab "%s" >}}', msigdb_pathway_set) %>% cat()
-  sprintf(fmt='{{< tabs "show_fgsea_enrichment_plots-%s" >}}', msigdb_pathway_set) %>% cat()
+  sprintf(fmt='{{< tab "%s" >}}', msigdb_pathway_set) %>% cat(sep='\n')
+  sprintf(fmt='{{< tabs "show_fgsea_enrichment_plots-%s" >}}', msigdb_pathway_set) %>% cat(sep='\n')
 
   for(comparison in {plots_list %>% pluck(msigdb_pathway_set) %>% names()}) {
-    sprintf(fmt='{{< tab "%s" >}}', comparison) %>% cat()
-    sprintf(fmt='{{< tabs "show_fgsea_enrichment_plots-%s-%s" >}}', msigdb_pathway_set, comparison) %>% cat()
+    sprintf(fmt='{{< tab "%s" >}}', comparison) %>% cat(sep='\n')
+    sprintf(fmt='{{< tabs "show_fgsea_enrichment_plots-%s-%s" >}}', msigdb_pathway_set, comparison) %>% cat(sep='\n')
 
     for(pathway in {plots_list %>% pluck(msigdb_pathway_set, comparison) %>% names() %>% headtail(n=3)}) {
-      sprintf(fmt='{{< tab "%s" >}}', pathway) %>% cat()
+      sprintf(fmt='{{< tab "%s" >}}', pathway) %>% cat(sep='\n')
 
       plots_list %>%
         pluck(msigdb_pathway_set, comparison, pathway) %>%
         resize_and_show(width=3)
   
-      cat('{{< /tab >}}')
+      cat('{{< /tab >}}', sep='\n')
     }
 
-    cat('{{< /tabs >}}')
-    cat('{{< /tab >}}')
+    cat('{{< /tabs >}}', sep='\n')
+    cat('{{< /tab >}}', sep='\n')
 
   }
 
-  cat('{{< /tabs >}}')
-  cat('{{< /tab >}}')
+  cat('{{< /tabs >}}', sep='\n')
+  cat('{{< /tab >}}', sep='\n')
 }
 
-cat('{{< /tabs >}}')
+cat('{{< /tabs >}}', sep='\n')
 ```
+
 
 <!-- a methods section for a manuscript, use {{< textcite "author-year" >}} -->
 
@@ -636,12 +625,12 @@ cat('{{< /tabs >}}')
 
 <!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r write_bibliography}
-#| bibliography_doi=c(clusterprofiler_4='10.1016/j.xinn.2021.100141',
-#|                    clusterprofiler='10.1089/omi.2011.0118',
-#|                    dose='10.1093/bioinformatics/btu684',
-#|                    fgsea='10.1101/060012',
-#|                    msigdb='10.1073/pnas.0506580102',
-#|                    msigdb_hallmark='10.1016/j.cels.2015.12.004'),
+#| doi=c(clusterprofiler_4='10.1016/j.xinn.2021.100141',
+#|       clusterprofiler='10.1089/omi.2011.0118',
+#|       dose='10.1093/bioinformatics/btu684',
+#|       fgsea='10.1101/060012',
+#|       msigdb='10.1073/pnas.0506580102',
+#|       msigdb_hallmark='10.1016/j.cels.2015.12.004'),
 #| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 

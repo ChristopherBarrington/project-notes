@@ -268,10 +268,10 @@ This needs to be adapted for paired-end datasets!
 
 <!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r write_bibliography}
-#| bibliography_doi=c(nextflow='10.1038/nbt.3820',
-#|                    nfcore='10.1038/s41587-020-0439-x',
-#|                    RSEM='10.1186%2F1471-2105-12-323',
-#|                    STAR='10.1093/bioinformatics/bts635'),
+#| doi=c(nextflow='10.1038/nbt.3820',
+#|       nfcore='10.1038/s41587-020-0439-x',
+#|       RSEM='10.1186%2F1471-2105-12-323',
+#|       STAR='10.1093/bioinformatics/bts635'),
 #| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 

@@ -214,7 +214,7 @@ for(project in names(tabs_list)) {
 
 <!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r write_bibliography}
-#| bibliography_doi=c(clustree='10.1093/gigascience/giy083'),
+#| doi=c(clustree='10.1093/gigascience/giy083'),
 #| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 

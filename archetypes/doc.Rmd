@@ -99,7 +99,7 @@ Anything here is included in the summary.
 
 <!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
 ```{r write_bibliography}
-#| bibliography_doi=c(),
+#| doi=c(),
 #| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
 ```
 

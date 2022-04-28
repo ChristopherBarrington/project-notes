@@ -1,8 +1,9 @@
 ---
-title: {{ default (.File.Path | path.Dir | path.Base | replaceRE "^20\\d+-\\d+-\\d+-" "" | humanize | title) (getenv "TITLE") }}
+title: {{ .File.Path | path.Dir | path.Base | humanize | title }}
 weight:
 
 categories:
+
 tags:
 
 authors:
@@ -16,6 +17,6 @@ toc: false
 draft: false
 ---
 
-{{ default "<!-- Anything here is included in the summary. -->" (getenv "SUMMARY") }}
+Anything here is included in the summary.
 
 <!--more-->

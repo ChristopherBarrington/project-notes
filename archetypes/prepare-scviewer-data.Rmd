@@ -1,0 +1,282 @@
+---
+title: Prepare Data for scviewer
+weight:
+
+categories:
+
+tags:
+
+authors:
+  - christopher-barrington
+
+type: docs
+toc: true
+draft: false
+
+date: `r format(Sys.time(), "%Y-%m-%d")`
+created: 2022-02-23
+
+always_allow_html: true
+output:
+  html_document:
+    keep_md: yes
+    df_print: paged
+---
+
+<!-- initial set up chunks are invisible -->
+
+<!-- read the standard knitr setup script -->
+```{r knitr_setup}
+#| code=readLines(system.file('chunks/knitr.r', package='project.notes.tools')),
+#| echo=FALSE
+```
+
+<!-- make subdirectories to write into/any bash work -->
+```{bash setup_wd}
+#| code=readLines(system.file('chunks/working_directory.sh', package='project.notes.tools')),
+#| opts.label='batch_chunk'
+```
+
+<!-- load any packages for the workbook -->
+```{r load_workbook_packages}
+#| opts.label='batch_chunk'
+
+library(datarepository)
+
+file.path('published', 'cell-2018', 'Scripts', 'scrdb') |>
+  system.file(package='datarepository') |>
+  devtools::load_all()
+
+library(methods)
+library(Matrix)
+library(ape)
+library(matrixStats)
+library(scales)
+
+detach('package:datarepository') # `pkgload` overrides datarepository::system.file
+library(datarepository)
+
+file.path('published', 'cell-2018', 'Scripts', 'Nvec_downstream_analysis.R') |>
+  system.file(package='datarepository') |>
+  source()
+
+file.path('published', 'cell-2018', 'Scripts', 'Bootstrapping.R') |>
+  system.file(package='datarepository') |>
+  source()
+```
+
+<!-- read the standard setup script, loading well-used libraries -->
+```{r configure_r}
+#| code=readLines(system.file('chunks/environment.r', package='project.notes.tools')),
+#| opts.label='batch_chunk'
+```
+
+<!-- set a ggplot theme to use as a base in the workbook -->
+```{r define_global_ggplot_theme}
+#| opts.label='batch_chunk'
+
+(theme_bw() +
+ theme(text=element_text(size=10, colour='black'),
+       panel.grid.minor=element_blank(),
+       strip.background=element_blank())) %>%
+theme_set()
+```
+
+<!-- define shortcut links to other reports here for ease and reuse -->
+```{r write_slugs}
+#| child=system.file('children/write_slugs.Rmd', package='project.notes.tools'),
+#| slugs=list(`published data post`='published-data')
+```
+
+[CRICK]: https://www.crick.ac.uk
+
+[scviewer github]: https://github.com/ChristopherBarrington/scviewer
+[scviewer app github]: https://github.com/ChristopherBarrington/scviewer-app
+
+<!-- any final things to set for this workbook -->
+```{r final_setup}
+#| opts.label='batch_chunk'
+```
+
+<!-- end of initial set up chunks -->
+
+The pre(re)processed data from [{{< post-title "published-data" >}}][published data post] will be used here to generate a matrix of gene expression for each cell which will be exported into a h5 file for [scviewer][scviewer app github]. The 2D projection may be an issue though, since scviewer expects a 2D and 3D projection. We could add a 2D/3D projection from Seurat though.
+
+<!--more-->
+
+## Collect the results from [{{< post-title "published-data" >}}][published data post]
+
+Some of the objects created in [{{< post-title "published-data" >}}][published data post] are useful here: the normalised expression matrix, the cell metadata and the 2D projection coordinates. These are loaded in the following chunk for use in this post.
+
+```r
+#| label='load_preprocessed_data'
+
+file.path(website_path, 'content', 'project-data', 'published-data', 'scratch', 'write_sc_pipe_plots', 'larva_filt_2d.Rda') %>%
+  load(envir=globalenv()) # provides sc_2d
+```
+
+The `sc_2d` object will provide the:
+
+* 2D coordinates in the `sc_2d@x` and `sc_2d@y` slots
+* niche in the `sc_2d@scl@clusts` slot
+* cell metadata from the `sc_2d@scl@scmat@cell_metadata` slot
+
+## Create a normalised expression matrix
+
+Using the `scp_plot_gene_2d` function as a template (defined in the `scrdb` package's `cluster_layout.r` file, line 926) the following chunk normalises the expression matrix. The number of UMI observed is normalised as a proportion of total expression (and `rbinom` result added...? Which gives `rna` to be plotted).
+
+```r
+#| dependson='load_preprocessed_data'
+#| label='get_rna_matrix'
+
+slot(object=sc_2d, name='scl') %>%
+  slot(name='scmat') %>%
+  slot(name='mat') %>%
+  as.matrix() %>%
+  {.[rowSums(.)>0,]} %>%
+  as.data.frame() %>%
+  rownames_to_column('feature_id') %>%
+  gather(key=cell_id, value=count, -feature_id) %>%
+  left_join(y={group_by(., cell_id) %>% summarise(total_count=sum(count)) %>% mutate(median_total_count=median(total_count))}, by='cell_id') %>%
+  ddply(~feature_id, .parallel=TRUE, function(data)
+    mutate(data,
+           rna=floor(count/total_count*median_total_count)) %>%
+      select(feature_id, cell_id, rna)) %>%
+  spread(key=feature_id, value=rna) %>%
+  column_to_rownames('cell_id') %>%
+  as.matrix() %>%
+  Matrix(sparse=TRUE) -> rna_matrix
+
+rna_matrix <- rna_matrix[slot(object=sc_2d, name='scl') %>% slot(name='scmat') %>% slot(name='cells'),]
+
+saveRDS(object=rna_matrix, file='scratch/rna_base.rds')
+```
+
+{{< callout warning >}}
+The quantified expression here may be slightly different to other reports where expression is calculated. The `rbinom` function adds 1 or 0 to the `rna_base` and may be different when rerun. Again, I'm now using the (equivalent) `rna_base` instead.
+{{< /callout >}}
+
+## Install scviewer
+
+The [scviewer package][scviewer github] is installed, using a development branch.
+
+```r
+renv::install('ChristopherBarrington/scviewer@features-progress-bar')
+library(scviewer)
+```
+
+## Create the app
+
+The [GitHub repository][scviewer app github] is now cloned into the project directory.
+
+```bash
+cd /camp/stp/babs/working/barrinc/projects/briscoej/joaquina.delas/Nematostella_vectensis_scRNA_seq_analysis
+git clone git@github.com:ChristopherBarrington/scviewer-app.git scviewer && cd $_
+git submodule update --init --remote
+```
+
+## Create the scviewer object
+
+Since we don't currently have a Seurat object, this may get a bit messy.
+
+First, the empty h5 file is created.
+
+```r
+fs::path(project_path, 'scviewer', 'h5_files', 'sebe-pedros', ext='scv') %T>%
+  create_h5_scv() -> h5_file
+```
+
+Now we write the features to the h5 file (without changing the gene names for now).)
+
+```r
+write_features(h5_file=h5_file, features_matrix=rna_matrix)
+```
+
+The 2D reduction is now written to the file. Since I don't actually know what reduction method was used I'm just going to call it `pca` and set a 3D version with all 0 in the 3rd dimension. (I'm not sure if there will be an error if the reduction isn't an expected name.
+
+```r
+data.frame(cell_id={slot(object=sc_2d, name='scl') %>% slot(name='scmat') %>% slot(name='cells')}) %>%
+  left_join(y={slot(object=sc_2d, name='x') %>% enframe(name='cell_id', value='x')}, by='cell_id') %>%
+  left_join(y={slot(object=sc_2d, name='y') %>% enframe(name='cell_id', value='y')}, by='cell_id') %>%
+  list(pca=., pca_3d=add_column(., z=0)) %T>%
+  write_reductions(h5_file=h5_file) -> reductions
+```
+
+```text
+$pca
+  cell_id         x        y
+1 P12W001  99.62947 212.0398
+2 P12W003 269.65922 127.5425
+3 P12W005 261.67438 625.7014
+4 P12W009 400.80333 813.8258
+5 P12W011 242.21577 126.5963
+6 P12W015 257.04765 168.7500
+
+$pca_3d
+  cell_id         x        y z
+1 P12W001  99.62947 212.0398 0
+2 P12W003 269.65922 127.5425 0
+3 P12W005 261.67438 625.7014 0
+4 P12W009 400.80333 813.8258 0
+5 P12W011 242.21577 126.5963 0
+6 P12W015 257.04765 168.7500 0
+```
+
+A metadata table is now constructed and written.
+
+```r
+file.path('published', 'cell-2018', 'Annotation_and_config_files', 'Larva_metacell_annotation') %>%
+  system.file(package='datarepository') %T>%
+  scr_load_sn_table(sc_object=slot(object=sc_2d, name='scl')) %>%
+  read.delim() -> metacell_annotations
+
+slot(object=sc_2d, name='scl') %>%
+  slot(name='scmat') %>%
+  slot(name='cell_metadata') %>%
+  rownames_to_column('cell_id') %>%
+  left_join(y={slot(object=sc_2d, name='scl') %>% slot(name='clusts') %>% enframe(name='cell_id', value='niches') %>% mutate(niches=as.numeric(niches))}, by='cell_id') %>%
+  left_join(y=metacell_annotations, by='niches') %>%
+  mutate(metacluster=sprintf(fmt='%s (%s)', metacluster, niches),
+         MARS_BATCH=factor(MARS_BATCH),
+         Source=factor(Source, levels=c('planula', 'early_planula', 'gastrula')),
+         metacluster=factor(metacluster, levels={metacell_annotations %>% transmute(V1=sprintf(fmt='%s (%s)', metacluster, niches)) %>% deframe()})) %T>%
+  write_metadata(h5_file=h5_file) -> metadata
+```
+
+```text
+  cell_id MARS_BATCH   Source   Color niches        metacluster       color
+1 P12W001 NvPl2dP12A gastrula #8DD3C7      3         Undiff (3)   lightgrey
+2 P12W003 NvPl2dP12A gastrula #8DD3C7     11        Undiff (11)   lightgrey
+3 P12W005 NvPl2dP12A gastrula #8DD3C7     37 Larval_neuron (37)  steelblue1
+4 P12W009 NvPl2dP12A gastrula #8DD3C7     29  Gastrodermis (29) chartreuse4
+5 P12W011 NvPl2dP12A gastrula #8DD3C7      1         Undiff (1)   lightgrey
+6 P12W015 NvPl2dP12A gastrula #8DD3C7     11        Undiff (11)   lightgrey
+```
+
+Cell cluster identities are now written, using the information in the above `metadata`
+
+```r
+list(metacluster=list(var='metacluster', name='Metacluster', selected=levels(metadata$metacluster))) %>%
+  write_cluster_identity_sets(h5_file=h5_file)
+```
+
+Cell filters are now defined from the metadata.
+
+```r
+list(`MARS batch`=list(var='MARS_BATCH', selected=levels(metadata$MARS_BATCH)),
+     `Dev. stage`=list(var='Source', selected=levels(metadata$Source))) %>%
+  write_cell_filter_parameters(h5_file=h5_file)
+```
+
+<!-- include a references section; DOIs for software used in the workbook or to generate presented results, a named vector of strings -->
+```{r write_bibliography}
+#| bibliography_doi=c(),
+#| child=system.file('children/write_bibliography.Rmd', package='project.notes.tools')
+```
+
+<!-- include a session information section -->
+```{r show_session_information}
+#| child=system.file('children/session_information.Rmd', package='project.notes.tools'),
+#| opts.label='batch_chunk',
+#| saved_objects <- c()
+```

@@ -134,7 +134,7 @@ The variables defined about are used to generate a [best-guess input sample shee
 
 ```{bash guess_sample_sheet, eval=pairedness=='single_end'}
 find -L ${PRIMARY_DATA} -name '*fastq.gz' -printf '%f %p\n' | \
-  sort -k2 --version-sort |\
+  sort -k2 --version-sort | \
   sed 's/_\S*fastq.gz//' | \
   awk --assign strandedness=${STRANDEDNESS} 'BEGIN{print "sample,fastq_1,fastq_2,strandedness"} {print $1 "," $2 ",," strandedness}' > files/input.csv
 ```

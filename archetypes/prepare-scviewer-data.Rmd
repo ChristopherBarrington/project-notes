@@ -73,13 +73,8 @@ file.path('published', 'cell-2018', 'Scripts', 'Bootstrapping.R') |>
 
 <!-- set a ggplot theme to use as a base in the workbook -->
 ```{r define_global_ggplot_theme}
+#| file=system.file('chunks/ggplot_theme.r', package='project.notes.tools'),
 #| opts.label='batch_chunk'
-
-(theme_bw() +
- theme(text=element_text(size=10, colour='black'),
-       panel.grid.minor=element_blank(),
-       strip.background=element_blank())) %>%
-theme_set()
 ```
 
 <!-- define shortcut links to other reports here for ease and reuse -->

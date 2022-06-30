@@ -24,13 +24,6 @@ social:
     display:
       header: true
       footer: true
-  - label: GitHub
-    icon: github-alt
-    icon_pack: fab
-    link: https://github.com/{{ getenv "GITHUB" | default "FrancisCrickInstitute" }}
-    display:
-      header: true
-      footer: false
   - label: ORCID
     icon: orcid
     icon_pack: ai
@@ -40,4 +33,4 @@ social:
       footer: false
 ---
 
-<!-- GITHUB=ChristopherBarrington ORCID=0000-0003-1281-2658 LIMSID=`ts get key=Lims` hugo new --kind author authors/christopher-barrington -->
+<!-- ORCID=0000-0003-1281-2658 LIMSID=`ts get key=Lims` hugo new --kind author authors/christopher-barrington -->

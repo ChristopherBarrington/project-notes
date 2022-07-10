@@ -11,7 +11,7 @@ organizations:
     url: https://www.crick.ac.uk/research/platforms-and-facilities/bioinformatics-and-biostatistics
 
 # social/academic networking
-# for available icons, see: https://sourcethemes.com/academic/docs/page-builder/#icons
+# for available icons, see: https://sourcethemes.com/academic/docs/page-builder/#icons and https://fontawesome.com/v5/search
 #   for an email link, use "fas" icon pack, "envelope" icon, and a link in the
 #   form "mailto:your-email@example.com" or "#contact" for contact widget.
 social:

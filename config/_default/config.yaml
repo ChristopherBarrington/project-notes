@@ -8,7 +8,7 @@ title: 'BABS project report' # Website name
 relativeURLs: false # setting true breaks many things
 canonifyURLs: false
 
-copyright: '© {year} Christopher Barrington' # Footer text, e.g. '© {year} Me'
+copyright: '' # Footer text, e.g. '© {year} Me'
 
 ############################
 ## LANGUAGE

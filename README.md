@@ -57,8 +57,7 @@ hugo new --kind bibliography publication
 
 ```bash
 TITLE=`ts get key=Scititle` hugo new --kind home home
-(cd content/home
- renv_ln)
+(cd content/home && renv_ln)
 ```
 
 ```bash

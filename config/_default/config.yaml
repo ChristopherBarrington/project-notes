@@ -50,10 +50,11 @@ ignoreFiles:
   - \.Rproj.user$
   - \.Rproj$
   - _rslurm_*
-  - knitr_cache
-  - renv
+  - /analysis/
+  - /knitr_cache/
+  - /renv/
   - renv.lock
-  - scratch
+  - /scratch/
   - .future
   - ^VennDiagram.*
 

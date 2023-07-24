@@ -6,16 +6,18 @@ hugo-cache/
 public/
 resources/
 jsconfig.json
+.hugo_build.lock
 
 # ignore typical symlinks to website outputs
 website-*
 
-# ignore the contents of the contents directory except for the .gitkeep
+# ignore the contents of the contents directory except for the home page
 content/*
-!content/.gitkeep
+!content/_index.html
 
 # ignore the contents of the static directory, if one gets created
 static/*
+!static/css
 
 # mac
 .DS_Store

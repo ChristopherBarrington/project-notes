@@ -1,0 +1,25 @@
+# configuration file for `relearn` theme's parameters
+
+additionalContentLanguage: en
+alwaysopen: false
+# author: Christopher Barrington
+breadcrumbSeparator: ">"
+collapsibleMenu: true
+description: BABS reports
+disableBreadcrumb: false
+disableInlineCopyToClipBoard: true
+disableLandingPageButton: false
+disableNextPrev: true
+disableSeoHiddenPages: true
+disableShortcutsTitle: false
+disableToc: false
+# editURL: "https://github.com/ChristopherBarrington/scamp/edit/main/docs/content"
+showVisitedLinks: false
+themeVariant: 
+  - auto
+  - crick
+  - neon
+themeVariantAuto: 
+  - relearn-light
+  - relearn-dark
+titleSeparator: "|"

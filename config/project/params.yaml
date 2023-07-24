@@ -1,0 +1,9 @@
+# project parameters
+# this should be overwritten when a project is created
+
+babs:
+  lab: babs
+  scientist: christopher.barrington
+  title: this is the title from project/params.yaml
+  lims: CB23000
+  hash: cb000

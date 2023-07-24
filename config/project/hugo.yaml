@@ -1,0 +1,6 @@
+# hugo parameters for the project
+# this should be overwritten when a project is created
+
+Languages:
+  en:
+    title: this is the project title from params/hugo.yaml

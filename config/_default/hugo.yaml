@@ -1,0 +1,76 @@
+# hugo configuration file
+# https://gohugo.io/getting-started/configuration/#all-configuration-settings
+
+# canonicalization will only be used for the sitemap.xml and index.xml files;
+# if set to false, a site served from a subdirectory will generate wrong links
+# inside of the above mentioned files; if you serve the page from the servers root
+# you are free to set the value to false as recommended by the official Hugo documentation
+canonifyURLs: true # true -> all relative URLs would instead be canonicalized using baseURL
+
+# required value to serve this page from a webserver AND the file system;
+# if you don't want to serve your page from the file system, you can also set this value
+# to false
+relativeURLs: true # true -> rewrite all relative URLs to be relative to the current content
+
+# if you set uglyURLs to false, this theme will append 'index.html' to any branch bundle link
+# so your page can be also served from the file system; if you don't want that,
+# set disableExplicitIndexURLs=true in the [params] section
+uglyURLs: false     # true -> basic/index.html -> basic.html
+
+# the main language of this site
+languageCode: en
+
+# for search functionality
+outputs:
+  home:
+    - HTML
+    - RSS
+    - PRINT
+    - SEARCH
+    - SEARCHPAGE
+  section:
+    - HTML
+    - RSS
+    - PRINT
+  page:
+    - HTML
+    - RSS
+    - PRINT
+
+# limit he acceptable environment variables
+security:
+  funcs:
+    getenv:
+      - "^HUGO_"
+      - "^CI$"
+
+# files and directories in the reports that should not be included in the website
+module:
+  mounts:
+    source: content
+    target: content
+    includeFiles:
+      - "**.md"
+      - "**/files/**"
+  imports:
+    path: github.com/McShelby/hugo-theme-relearn
+
+# markup boxes
+markup:
+  highlight:
+    guessSyntax: false
+    lineNos: false
+    lineNumbersInTable: false
+    anchorLineNos: true
+    style: github
+
+  goldmark:
+    renderer:
+      unsafe: true
+
+# menu shortcuts
+Languages:
+  en:
+    title: This is a default title
+    params:
+      landingPageName: "<i class='fas fa-home'></i> home"

@@ -1,0 +1,10 @@
+/* override relearn theme styling */
+
+/* breadcrumbs  */
+#breadcrumbs span[itemProp="name"] {
+	/* limit size of a breadcrumb element using ellipsis to wrap long page titles */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 9em;
+	vertical-align: bottom;
+}

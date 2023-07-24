@@ -1,0 +1,9 @@
+{{ $context := .context }}
+{{ $paramNames := split .name "." }}
+{{ with $context }}
+	{{ $params := .Site.Params }}
+	{{ range $paramName := $paramNames }}
+		{{ $params = index $params $paramName }}
+	{{ end }}
+	{{ markdownify $params }}
+{{ end }}

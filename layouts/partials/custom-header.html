@@ -1,0 +1,6 @@
+<!-- Partial intended to be overwritten to add custom headers, like CSS or any other info-->
+
+<!-- add css from static -->
+{{ range readDir "/static/css" }}
+	{{ if and (not (hasPrefix .Name "theme-")) (hasSuffix .Name ".css") }} <link rel="stylesheet" href='{{ path.Join "/css" .Name }}'/> {{ end }}
+{{ end }}

@@ -1,5 +1,0 @@
-{{- $cite_key := . -}}
-{{- with site.GetPage $cite_key -}}
-  {{- $item := . -}}
-  <a href="#" class="js-cite-modal" data-filename="{{ path.Join (path.Dir $item.File) "cite.bib" | path.Join .Site.BaseURL }}">{{ (index $item.Params.authors 0) | replaceRE ".* " "" }}, {{ time.Format "2006" $item.Params.date }}</a>
-{{- end -}}

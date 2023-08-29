@@ -1,5 +1,8 @@
 ## Syntax notes
 
+
+### content visibility
+
 ```
 ::: {.content-visible when-profile="dev"}
 This content will only appear in the dev version.
@@ -12,11 +15,23 @@ This content will only appear in the internal version.
 ::: {.content-visible when-profile="external"}
 This content will only appear in the external version.
 :::
+```
 
+### callouts
+
+```
 ::: {.callout-note collapse=true title="A descriptive title"}
 Note that there are five types of callouts, including:
 `note`, `warning`, `important`, `tip`, and `caution`.
 :::
+```
+
+### [citations](https://quarto.org/docs/authoring/footnotes-and-citations.html)
+
+```
+@key1
+[@key1; @key2]
+@{key1}
 ```
 
 ## Extensions

@@ -1,5 +1,5 @@
 bibliography:
-  - _configs/project/references.bib  
+  - _configs/project/bibliography.bib  
 title-block-banner: true
 date-format: long
 reference-location: margin

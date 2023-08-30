@@ -16,7 +16,7 @@ format:
     link-external-filter: bioinformatics.crick.ac.uk|bioinformatics.thecrick.org|github.com/BABS-STP
 
     code-fold: true
-    code-overflow: wrap
+    code-overflow: scroll
     code-line-numbers: false
     code-copy: hover
     code-link: false

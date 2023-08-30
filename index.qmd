@@ -1,0 +1,6 @@
+---
+title: "{{TITLE}}"
+keep-md: false
+metadata-files:
+  - _configs/project/authors.yaml
+---

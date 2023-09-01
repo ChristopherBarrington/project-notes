@@ -17,12 +17,28 @@ This content will only appear in the external version.
 :::
 ```
 
-### callouts
+### [callouts](https://quarto.org/docs/authoring/callouts.html)
 
 ```
 ::: {.callout-note collapse=true title="A descriptive title"}
-Note that there are five types of callouts, including:
+There are five types of callouts, including:
 `note`, `warning`, `important`, `tip`, and `caution`.
+:::
+
+::: {.callout-tip title="Tip with Title"}
+This is a callout with a title.
+:::
+```
+
+You can set the callout appearance either globally in the document (or project yaml) or in the div definition:
+```yaml
+callout-appearance: simple
+```
+
+```
+::: {.callout-note appearance='simple'}
+## Pay Attention
+Using callouts is an effective way to highlight content that your reader give special consideration or attention.
 :::
 ```
 

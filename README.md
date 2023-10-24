@@ -46,6 +46,7 @@ Using callouts is an effective way to highlight content that your reader give sp
 
 ```
 @key1
+[@key1] # (Author 2023)
 [@key1; @key2]
 @{key1}
 ```

@@ -144,6 +144,21 @@ Even filters that replace text:+br
 .doo+dab+dab+dab!doa, +dab!doa!
 ```
 
+## [project citation](https://quarto.org/docs/reference/metadata/citation.html)
+
+Once published, a citation can be added to the homepage's `index.{qR}md`. This will add a citation field to an appnedix-style div on the home page. The markdown can be exported from bibdesk: right-click -> copy using template -> quarto-citation-metadata
+
+```yaml
+citation:
+  type: article-journal
+  container-title: ACM Transactions on Embedded Computing Systems
+  volume: 21
+  issue: 2
+  issued: 2022-03
+  issn: 1539-9087
+  doi: 10.1145/3514174
+```
+
 ## Bugs
 
 * code annotations: [Safari problem](https://github.com/quarto-dev/quarto-cli/issues/6387), switch to Chrome

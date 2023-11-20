@@ -1,10 +1,5 @@
-bibliography:
-  - _configs/project/bibliography.bib  
-title-block-banner: true
-date-format: long
-reference-location: margin
-citation-location: document
-appendix-style: default
+date-format: "Do MMMM, YYYY"
+
 filters:
   - search-replace
 search-replace:

@@ -1,5 +1,23 @@
 ## Syntax notes
 
+### code chunks
+```
+{.bash filename='Create Singularity image'}
+singularity build \
+tb-profiler_1.sif \
+docker://quay.io/biocontainers/tb-profiler:5.0.1--pyhdfd78af_1
+```
+
+```
+{bash create-singularity}
+#| code-summary: Create Singularity image
+#| eval: false
+
+singularity build \
+tb-profiler_1.sif \
+docker://quay.io/biocontainers/tb-profiler:5.0.1--pyhdfd78af_1
+```
+
 
 ### content visibility
 

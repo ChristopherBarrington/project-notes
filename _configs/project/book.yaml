@@ -8,5 +8,5 @@ book:
     - index.qmd
     - part: collection-1/index.md
       chapters:
-      - collection-1/topic-1/index.Rmd
-      - collection-1/topic-2/index.Rmd
+        - collection-1/topic-1/index.Rmd
+        - collection-1/topic-2/index.Rmd

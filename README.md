@@ -18,7 +18,6 @@ tb-profiler_1.sif \
 docker://quay.io/biocontainers/tb-profiler:5.0.1--pyhdfd78af_1
 ```
 
-
 ### content visibility
 
 ```
@@ -70,7 +69,7 @@ ln --symbolic /nemo/stp/babs/working/barrinc/projects/christopher.barrington/tem
 
 ```
 @key1
-[@key1] # (Author 2023)
+[@key1]        # (Author 2023)
 [@key1; @key2]
 @{key1}
 ```

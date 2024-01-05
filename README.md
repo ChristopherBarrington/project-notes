@@ -62,6 +62,12 @@ Using callouts is an effective way to highlight content that your reader give sp
 
 ### [citations](https://quarto.org/docs/authoring/footnotes-and-citations.html)
 
+The configuration file points to a bibilography in `_configs/projects/bibliography.bib`. This can be created for a project (specifically) or linked to a project-independent collection of references.
+
+```bash
+ln --symbolic /nemo/stp/babs/working/barrinc/projects/christopher.barrington/templates/bibliography.bib _configs/project/bibliography.bib
+```
+
 ```
 @key1
 [@key1] # (Author 2023)

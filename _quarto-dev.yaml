@@ -4,4 +4,4 @@ format:
       source: true
 
 project:
-  output-dir: _website-dev
+  output-dir: _rendered-dev

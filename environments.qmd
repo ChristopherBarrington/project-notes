@@ -9,7 +9,7 @@ includes:
   renv: true
 ---
 
-# Environments {.appendix}
+# Environments {.appendix .unnumbered}
 
 ```{r provide-yaml-engine}
 #| echo: false

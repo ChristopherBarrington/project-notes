@@ -1,8 +1,9 @@
 ---
-title: References
 execute:
   keep-md: false
 ---
+
+# References {.unnumbered}
 
 ```{r configure-knitr}
 #| cache: false

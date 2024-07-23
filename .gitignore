@@ -1,26 +1,15 @@
-# IDEs
-.idea/
-
-# hugo
-hugo-cache/
-public/
-resources/
-jsconfig.json
-
-# ignore typical symlinks to website outputs
-website-*
-
-# ignore the contents of the contents directory except for the .gitkeep
-content/*
-!content/.gitkeep
-
-# ignore the contents of the static directory, if one gets created
-static/*
-
-# mac
-.DS_Store
-
 # r
+.renvignore
+.Rprofile
 *.Rproj
-renv
 .Rproj.user
+renv/
+
+# quarto
+/.quarto/
+_freeze/
+site_libs/
+
+# rendered outputs
+_rendered-*/
+files/

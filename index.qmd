@@ -1,6 +1,13 @@
+# Introduction {.unnumbered}
+
+{{< lipsum 1-3 >}}
+
+## Objectives
+
+{{< lipsum 1 >}}
+
 ---
-title: "{{TITLE}}"
-keep-md: false
-metadata-files:
-  - _configs/project/authors.yaml
----
+
+## Notes
+
+{{< lipsum 1-3 >}}

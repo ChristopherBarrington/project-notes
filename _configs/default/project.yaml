@@ -1,5 +1,6 @@
 project:
   execute-dir: file
+  output-dir: _rendered
   resources:
     - files/
     - _img/

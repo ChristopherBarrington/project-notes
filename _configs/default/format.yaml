@@ -50,6 +50,7 @@ format:
     toc-expand: 1
     toc-location: left
     toc-title: Contents
+    number-sections: false
 
     # references
     bibliography:

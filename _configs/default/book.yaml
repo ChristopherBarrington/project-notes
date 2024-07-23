@@ -15,10 +15,10 @@ book:
     id: sidebar
     title: _configs/default/book.yaml/sidebar/title
     logo: _assets/img/colour-logo.png
-    align: center
-    contents: auto
+    alignment: center
     border: true
     collapse-level: 1
+    contents: auto
 
   page-navigation: false
   back-to-top-navigation: false

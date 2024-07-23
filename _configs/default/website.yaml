@@ -16,9 +16,9 @@ website:
     title: _configs/default/website.yaml/title
     logo: _assets/img/colour-logo.png
     align: center
-    contents: auto
     border: true
     collapse-level: 1
 
   page-navigation: false
   back-to-top-navigation: false
+  bread-crumbs: true

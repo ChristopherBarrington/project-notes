@@ -20,7 +20,7 @@ book:
     collapse-level: 1
     contents: auto
 
-  page-navigation: false
+  page-navigation: true
   back-to-top-navigation: false
 
   chapters:

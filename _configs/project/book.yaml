@@ -4,16 +4,3 @@ book:
   sidebar:
     title: _configs/default/book.yaml/sidebar/title
 
-  chapters:
-    - index.qmd
-    - chapter-2/index.qmd
-    - chapter-1/index.qmd
-    - chapter-0/index.qmd
-    - part: Title or path to markdown file
-      chapters:
-        - part-1/chapter-1/index.qmd
-        - part-1/chapter-2/index.qmd
-
-  appendices:
-    - references.qmd
-    - environments.qmd

@@ -9,7 +9,11 @@ book:
     - chapter-2/index.qmd
     - chapter-1/index.qmd
     - chapter-0/index.qmd
-    - part: Appendices
+    - part: Title or path to markdown file
       chapters:
-        - references.qmd
-        - environments.qmd
+        - part-1/chapter-1/index.qmd
+        - part-1/chapter-2/index.qmd
+
+  appendices:
+    - references.qmd
+    - environments.qmd

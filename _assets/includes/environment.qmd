@@ -1,0 +1,22 @@
+<!-- setup the environment -->
+```{r r-environment-setup}
+#| cache: false
+#| echo: false
+#| include: false
+
+list(root.dir=Sys.getenv(x='ANALYSIS_PATH', unset=getwd())) |>
+	do.call(what=knitr::opts_knit$set)
+
+list(cache=FALSE,
+     message=FALSE,
+     warnings=FALSE,
+     crop=TRUE) |>
+	do.call(what=knitr::opts_chunk$set)
+
+knitr::knit_hooks$set(crop=knitr::hook_pdfcrop)
+
+rmarkdown::metadata |>
+	purrr::pluck('report', 'resources', 'ncpus', .default=1) |>
+	doMC::registerDoMC()
+```
+

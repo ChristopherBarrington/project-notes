@@ -1,0 +1,33 @@
+:::: {.column-margin}
+::: {.callout-tip icon=false}
+## {{< fa sign-in >}} Inputs &nbsp;
+
+```{r inputs-outputs-aside-inputs}
+#| cache: false
+#| echo: false
+#| results: asis
+
+rmarkdown::metadata |>
+	purrr::pluck('report', 'inputs', .default='- None') |>
+	yaml::as.yaml() |>
+	(\(x) paste0('- ', x))() |>
+	stringr::str_replace('^- - ', '- ') |>
+	cat()
+```
+:::
+::: {.callout-tip icon=false}
+## {{< fa sign-out >}} Outputs &nbsp;
+
+```{r inputs-outputs-aside-outputs}
+#| cache: false
+#| echo: false
+#| results: asis
+
+rmarkdown::metadata |>
+	purrr::pluck('report', 'outputs', .default='- None') |>
+	yaml::as.yaml() |>
+	cat()
+```
+
+:::
+::::

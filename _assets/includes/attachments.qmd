@@ -1,0 +1,53 @@
+<!-- include attachments, if `includes.attachments: true` is in the metadata -->
+
+::: {.content-visible when-meta="report.includes.attachments"}
+
+## Attachments {.appendix}
+
+These are additional files created in this chapter that may be helpful.
+
+```{r appendix-attachments}
+#| echo: false
+#| results: asis
+
+## ---- copy-targets
+
+copy_target_old <- function(x) {
+	subdir <- dirname(x)
+	filename <- basename(x)
+	report_path <- knitr::opts_knit$get('output.dir')
+	analysis_path <- knitr::opts_knit$get('root.dir')
+
+	file.path(report_path, 'files', subdir) -> files_path
+	dir.create(path=files_path, showWarnings=FALSE, recursive=TRUE)
+	
+	stringr::str_glue('cp {analysis_path}/{x} {files_path}') |> system()
+}
+
+copy_target <- function(x) {
+	report_path <- knitr::opts_knit$get('output.dir')
+	analysis_path <- knitr::opts_knit$get('root.dir')
+
+	files_path <- file.path(report_path, 'files')
+	dir.create(path=files_path, showWarnings=FALSE, recursive=TRUE)
+	
+	stringr::str_glue('cp --recursive --parents {x} {files_path}') |> system()
+}
+
+rmarkdown::metadata |>
+	purrr::pluck('report', 'attachments') |>
+	plyr::l_ply(copy_target)
+
+## ---- attach-targets
+
+knitr::opts_knit$get('output.dir') |>
+	file.path('files') |>
+	list.files(recursive=TRUE) -> files
+
+chunk_output <- 'No attachments to list.'
+if(length(files) > 0)
+	files |> (\(x) sprintf(fmt="{{< fa paperclip >}} [%s](files/%s)", x, x))() -> chunk_output
+cat(chunk_output, sep="</br>")
+```
+
+:::

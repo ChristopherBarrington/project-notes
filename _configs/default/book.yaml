@@ -23,15 +23,15 @@ book:
   page-navigation: true
   back-to-top-navigation: false
 
-  chapters:
-    - index.qmd
-    - chapter-2/index.qmd
-    - chapter-1/index.qmd
-    - chapter-0/index.qmd
-    - part: Title or path to markdown file
-      chapters:
-        - part-1/chapter-1/index.qmd
-        - part-1/chapter-2/index.qmd
+  # chapters:
+  #   - index.qmd
+  #   - chapter-2/index.qmd
+  #   - chapter-1/index.qmd
+  #   - chapter-0/index.qmd
+  #   - part: Title or path to markdown file
+  #     chapters:
+  #       - part-1/chapter-1/index.qmd
+  #       - part-1/chapter-2/index.qmd
 
   appendices:
     - references.qmd

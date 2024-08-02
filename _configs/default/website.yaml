@@ -21,4 +21,4 @@ website:
 
   page-navigation: false
   back-to-top-navigation: false
-  bread-crumbs: true
+  bread-crumbs: false

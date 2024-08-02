@@ -23,7 +23,7 @@ format:
 
     # footnotes
     footnotes-hover: false
-    reference-location: document
+    reference-location: margin
 
     # format options
     anchor-sections: true
@@ -55,7 +55,7 @@ format:
     # references
     bibliography:
       - _configs/project/bibliography.bib
-    citation-location: document
+    citation-location: margin
     citations-hover: true
     citeproc: true
 

@@ -170,7 +170,7 @@ Even filters that replace text:+br
 
 ## [project citation](https://quarto.org/docs/reference/metadata/citation.html)
 
-Once published, a citation can be added to the homepage's `index.{qR}md`. This will add a citation field to an appnedix-style div on the home page. The markdown can be exported from bibdesk: right-click -> copy using template -> quarto-citation-metadata
+Once published, a citation can be added to the homepage's `index.{qR}md`. This will add a citation field to an appendix-style div on the home page. The markdown can be exported from bibdesk: right-click -> copy using template -> quarto-citation-metadata
 
 ```yaml
 citation:

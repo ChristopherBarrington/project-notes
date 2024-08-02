@@ -4,14 +4,15 @@ execute:
 format:
   html:
     toc: false
-includes:
-  conda: true
+uses:
+  conda: false
   renv: true
 ---
 
 # Environments {.appendix .unnumbered}
 
 ```{r provide-yaml-engine}
+#| cache: false
 #| echo: false
 
 # write a generic chunk
@@ -34,7 +35,7 @@ json_engine <- function(options)
 knitr::knit_engines$set(yaml=yaml_engine, json=json_engine)
 ```
 
-::: {.content-visible when-meta="includes.conda"}
+::: {.content-visible when-meta="uses.conda"}
 
 [conda home]: https://docs.conda.io/en/latest/
 
@@ -55,6 +56,7 @@ mkdir --parents files \
 A [`conda`][conda home] environment was used with this project. [Download](files/conda.yaml) the environment file and use a command similar to the following to reinstall all of the packages.
 
 ```{bash show-example-conda-create}
+#| cache: false
 #| eval: false
 #| code-fold: false
 #| filename: Create a conda environment from an environment file
@@ -63,6 +65,7 @@ conda create --name environment --file conda.yaml
 ```
 
 ```{yaml show-conda-environment}
+#| cache: false
 #| code-fold: true
 #| code-summary: Reveal the conda environment
 #| file: files/conda.yaml
@@ -70,7 +73,7 @@ conda create --name environment --file conda.yaml
 ```
 :::
 
-::: {.content-visible when-meta="includes.renv"}
+::: {.content-visible when-meta="uses.renv"}
 
 [renv home]: https://rstudio.github.io/renv/
 
@@ -89,7 +92,5 @@ renv::snapshot(lockfile=file.path(path, 'renv.lock'), type='all')
 
 R packages were managed in this project using [`renv`][renv home]. A `lockfile` can be used by `renv` to install the version-matched R packages used in the project.
 
-[Download](files/renv.lock) the lockfile for the project to an empty directory. Start R version `r jsonlite::read_json('files/renv.lock')$R$Version`[^rversion] and use `renv::init()` to initialise a new renv-managed project.
-
-[^rversion]: The major/minor version is important but a different patch version _should_ still work.
+[Download](files/renv.lock) the lockfile for the project to an empty directory. Start R version `r jsonlite::read_json('files/renv.lock')$R$Version` and use `renv::init()` to initialise a new renv-managed project. [The major/minor version is important but a different patch version _should_ still work.]{.aside}
 :::

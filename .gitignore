@@ -9,6 +9,7 @@ renv/
 /.quarto/
 _freeze/
 site_libs/
+*.html.md
 
 # rendered outputs
 _rendered-*/

@@ -3,7 +3,7 @@ execute:
   keep-md: false
 ---
 
-# References {.unnumbered}
+# References {.appendix .unnumbered}
 
 ```{r configure-knitr}
 #| cache: false

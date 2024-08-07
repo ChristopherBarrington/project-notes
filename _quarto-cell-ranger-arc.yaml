@@ -1,0 +1,6 @@
+book:
+  title: Cell Ranger ARC
+  chapters:
+      - index.qmd
+      - arc/write-libraries-csv/index.qmd
+      - arc/count/index.qmd

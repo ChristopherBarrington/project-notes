@@ -7,8 +7,7 @@
 #| echo: false
 #| results: asis
 
-rmarkdown::metadata |>
-	purrr::pluck('report', 'inputs', .default='- None') |>
+purrr::pluck(rmarkdown::metadata, 'babs', 'inputs', .default='- None') |>
 	yaml::as.yaml() |>
 	(\(x) paste0('- ', x))() |>
 	stringr::str_replace('^- - ', '- ') |>
@@ -23,9 +22,10 @@ rmarkdown::metadata |>
 #| echo: false
 #| results: asis
 
-rmarkdown::metadata |>
-	purrr::pluck('report', 'outputs', .default='- None') |>
+purrr::pluck(rmarkdown::metadata, 'babs', 'outputs', .default='- None') |>
 	yaml::as.yaml() |>
+	(\(x) paste0('- ', x))() |>
+	stringr::str_replace('^- - ', '- ') |>
 	cat()
 ```
 

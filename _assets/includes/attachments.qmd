@@ -1,28 +1,13 @@
-<!-- include attachments, if `includes.attachments: true` is in the metadata -->
-
-::: {.content-visible when-meta="report.includes.attachments"}
-
-## Attachments {.appendix}
-
-These are additional files created in this chapter that may be helpful.
+<!-- include attachments, if `babs.attachments: true` is in the metadata -->
 
 ```{r appendix-attachments}
 #| echo: false
+#| eval: !expr purrr::pluck(rmarkdown::metadata, 'babs', 'attachments') |> is.null() |> magrittr::not()
 #| results: asis
 
+cat('## Attachments {.appendix}\n\n')
+
 ## ---- copy-targets
-
-copy_target_old <- function(x) {
-	subdir <- dirname(x)
-	filename <- basename(x)
-	report_path <- knitr::opts_knit$get('output.dir')
-	analysis_path <- knitr::opts_knit$get('root.dir')
-
-	file.path(report_path, 'files', subdir) -> files_path
-	dir.create(path=files_path, showWarnings=FALSE, recursive=TRUE)
-	
-	stringr::str_glue('cp {analysis_path}/{x} {files_path}') |> system()
-}
 
 copy_target <- function(x) {
 	report_path <- knitr::opts_knit$get('output.dir')
@@ -30,12 +15,11 @@ copy_target <- function(x) {
 
 	files_path <- file.path(report_path, 'files')
 	dir.create(path=files_path, showWarnings=FALSE, recursive=TRUE)
-	
-	stringr::str_glue('cp --recursive --parents {x} {files_path}') |> system()
+
+	stringr::str_glue('cp --recursive --parents --dereference {x} {files_path}') |> system()
 }
 
-rmarkdown::metadata |>
-	purrr::pluck('report', 'attachments') |>
+purrr::pluck(rmarkdown::metadata, 'babs', 'attachments', .default=list()) |>
 	plyr::l_ply(copy_target)
 
 ## ---- attach-targets
@@ -49,5 +33,3 @@ if(length(files) > 0)
 	files |> (\(x) sprintf(fmt="{{< fa paperclip >}} [%s](files/%s)", x, x))() -> chunk_output
 cat(chunk_output, sep="</br>")
 ```
-
-:::

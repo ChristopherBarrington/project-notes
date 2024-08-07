@@ -1,6 +1,6 @@
 book:
-  title: _configs/default/book.yaml/title
+  title: _configs/project/book.yaml/title
 
   sidebar:
-    title: _configs/default/book.yaml/sidebar/title
+    title: _configs/project/book.yaml/sidebar/title
 

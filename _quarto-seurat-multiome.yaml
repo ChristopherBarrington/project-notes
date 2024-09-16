@@ -1,0 +1,20 @@
+book:
+  title: Seurat
+
+  chapters:
+    - index.qmd
+    - seurat/multiome/read-10x/index.qmd
+    - seurat/multiome/preliminary-analysis/index.qmd
+    - seurat/multiome/quality-control-metrics/index.qmd
+    - seurat/multiome/filter-low-confidence-cells/index.qmd
+    - seurat/multiome/parameter-estimates/index.qmd
+    - seurat/multiome/parameterised-analysis/index.qmd
+
+  appendices:
+    - references/index.qmd
+    - environments/index.qmd
+
+format:
+  html:
+    bibliography:
+      - _assets/bibliography/seurat-multiome.bib

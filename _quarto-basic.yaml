@@ -1,0 +1,8 @@
+book:
+  title: A minimal example
+
+  chapters:
+      - index.qmd
+
+  appendices:
+    - environments/index.qmd

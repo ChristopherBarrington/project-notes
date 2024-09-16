@@ -1,11 +1,8 @@
 <!-- setup the environment -->
-```{r r-environment-setup}
+```{r r-environment-setup-knitr}
 #| cache: false
 #| echo: false
 #| include: false
-
-list(root.dir=Sys.getenv(x='ANALYSIS_PATH', unset=getwd())) |>
-	do.call(what=knitr::opts_knit$set)
 
 list(cache=FALSE,
      message=FALSE,
@@ -13,10 +10,32 @@ list(cache=FALSE,
      crop=TRUE) |>
 	do.call(what=knitr::opts_chunk$set)
 
-knitr::knit_hooks$set(crop=knitr::hook_pdfcrop)
-
-rmarkdown::metadata |>
-	purrr::pluck('report', 'resources', 'ncpus', .default=1) |>
-	doMC::registerDoMC()
+list(crop=knitr::hook_pdfcrop) |>
+	do.call(what=knitr::knit_hooks$set)
 ```
 
+```{r r-environment-setup-domc}
+#| cache: false
+#| echo: false
+#| include: false
+
+#
+# example front matter:
+#
+# ---
+# params:
+#   resources:
+#     value:
+#       cores: 2
+# ---
+#
+# ---
+# params:
+#   resources: !expr list(cores=2)
+# ---
+#
+
+params |>
+	purrr::pluck('resources', 'cores', .default=1) |>
+	doMC::registerDoMC()
+```

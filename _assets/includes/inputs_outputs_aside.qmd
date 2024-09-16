@@ -1,33 +1,57 @@
 :::: {.column-margin}
-::: {.callout-tip icon=false}
-## {{< fa sign-in >}} Inputs &nbsp;
 
 ```{r inputs-outputs-aside-inputs}
 #| cache: false
 #| echo: false
+#| eval: !expr rmarkdown::metadata |> purrr::pluck('report', 'inputs summary') |> is.null() |> magrittr::not()
 #| results: asis
 
-purrr::pluck(rmarkdown::metadata, 'babs', 'inputs', .default='- None') |>
+# example front matter:
+#
+# ---
+# report:
+#   inputs summary:
+#     value:
+#       - very short description
+# ---
+
+rmarkdown::metadata |>
+	purrr::pluck('report', 'inputs summary', .default='None') |>
 	yaml::as.yaml() |>
 	(\(x) paste0('- ', x))() |>
-	stringr::str_replace('^- - ', '- ') |>
-	cat()
+	stringr::str_replace('^- - ', '- ') -> content
+
+c('::: {.callout-tip icon=false}',
+  '## {{< fa sign-in >}} Inputs &nbsp;',
+  content,
+  ':::') |> cat(sep='\n')
 ```
-:::
-::: {.callout-tip icon=false}
-## {{< fa sign-out >}} Outputs &nbsp;
 
 ```{r inputs-outputs-aside-outputs}
 #| cache: false
 #| echo: false
+#| eval: !expr rmarkdown::metadata |> purrr::pluck('report', 'outputs summary') |> is.null() |> magrittr::not()
 #| results: asis
 
-purrr::pluck(rmarkdown::metadata, 'babs', 'outputs', .default='- None') |>
+# example front matter:
+#
+# ---
+# report:
+#   outputs summary:
+#     value:
+#       - very short description
+# ---
+
+rmarkdown::metadata |>
+	purrr::pluck('report', 'outputs summary', .default='None') |>
 	yaml::as.yaml() |>
 	(\(x) paste0('- ', x))() |>
-	stringr::str_replace('^- - ', '- ') |>
-	cat()
+	stringr::str_replace('^- - ', '- ') -> content
+
+c('::: {.callout-tip icon=false}',
+  '## {{< fa sign-out >}} Outputs &nbsp;',
+  content,
+  ':::') |> cat(sep='\n')
 ```
 
-:::
 ::::

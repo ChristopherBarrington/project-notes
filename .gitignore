@@ -4,6 +4,7 @@
 *.Rproj
 .Rproj.user
 renv/
+!_assets/renv
 
 # quarto
 /.quarto/
@@ -12,5 +13,13 @@ site_libs/
 *.html.md
 
 # rendered outputs
-_rendered-*/
+_rendered/
+
+# reports
+etc/
 files/
+index_files/
+inputs/
+logs/
+outputs/
+share/

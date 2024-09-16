@@ -1,0 +1,18 @@
+```{r write-renv-snapshot}
+#| cache: false
+#| include: false
+
+lockfile <- 'share/renv.lock'
+dirname(lockfile) |> dir.create(recursive=TRUE, showWarnings=FALSE)
+renv::snapshot(lockfile=lockfile, type='all')
+```
+
+## Reproducible R environment
+
+{{< fa paperclip >}} [`r lockfile`](`r lockfile`)
+
+R packages were managed in this project using [`renv`][renv home]. A `lockfile` can be used by `renv` to install the version-matched R packages used in the project.
+
+[Download](`r lockfile`) the lockfile for the project to an empty directory. Start R version `r jsonlite::read_json(lockfile)$R$Version` and use `renv::init()` to initialise a new renv-managed project. [The major/minor version is important but a different patch version _should_ still work.]{.aside}
+
+[renv home]: https://rstudio.github.io/renv/

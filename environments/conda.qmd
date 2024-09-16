@@ -1,0 +1,34 @@
+## Conda environment
+
+{{< fa paperclip >}} [conda.yaml](share/conda.yaml)
+
+A [`conda`][conda home] environment was used with this project. [Download](share/conda.yaml) the environment file and use a command similar to the following to reinstall all of the packages.
+
+[conda home]: https://docs.conda.io/en/latest/
+
+```{bash write-conda-recipe}
+#| cache: false
+#| include: false
+
+mkdir --parents share \
+&& conda env export \
+| grep --invert '^prefix: ' \
+> share/conda.yaml
+```
+
+```{bash show-example-conda-create}
+#| cache: false
+#| eval: false
+#| code-fold: false
+#| filename: Create a conda environment from an environment file
+
+conda create --name environment --file share/conda.yaml
+```
+
+```{yaml show-conda-environment}
+#| cache: false
+#| code-fold: true
+#| code-summary: Reveal the conda environment
+#| file: share/conda.yaml
+#| filename: !expr knitr::opts_current$get('file')
+```

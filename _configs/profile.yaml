@@ -1,0 +1,6 @@
+profile:
+  group:     
+    - [basic, cell-ranger-arc, seurat-multiome]
+    - [project]
+    - [babs]
+    - [dev, live]

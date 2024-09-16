@@ -1,0 +1,5 @@
+project:
+  execute-dir: file
+  output-dir: _rendered-project
+  resources:
+    - share/

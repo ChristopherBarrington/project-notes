@@ -1,5 +1,5 @@
 book:
-  title: _configs/default/book.yaml/title
+  title: book/title
   favicon: _assets/img/black-logo.jpg
   site-url: https://bioinformatics.thecrick.org/users
 
@@ -13,7 +13,7 @@ book:
 
   sidebar:
     id: sidebar
-    title: _configs/default/book.yaml/sidebar/title
+    title: book/sidebar/title
     logo: _assets/img/colour-logo.png
     alignment: center
     border: true
@@ -23,16 +23,3 @@ book:
   page-navigation: true
   back-to-top-navigation: false
 
-  # chapters:
-  #   - index.qmd
-  #   - chapter-2/index.qmd
-  #   - chapter-1/index.qmd
-  #   - chapter-0/index.qmd
-  #   - part: Title or path to markdown file
-  #     chapters:
-  #       - part-1/chapter-1/index.qmd
-  #       - part-1/chapter-2/index.qmd
-
-  appendices:
-    - references.qmd
-    - environments.qmd

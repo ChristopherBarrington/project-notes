@@ -53,11 +53,12 @@ format:
     number-sections: false
 
     # references
-    bibliography:
-      - _configs/project/bibliography.bib
     citation-location: document
     citations-hover: true
     citeproc: true
+
+    # tables
+    html-table-processing: none
 
   # gfm: default
   # pdf: default

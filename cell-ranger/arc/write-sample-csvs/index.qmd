@@ -1,5 +1,5 @@
 ---
-title: Create library files for the project
+title: Create sample configuration CSV files
 
 description:
   The Cell Ranger ARC configuration file provides sample names, identifiers and paths for FastQ files to quantify.

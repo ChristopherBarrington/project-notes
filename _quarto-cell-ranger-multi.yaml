@@ -1,0 +1,19 @@
+book:
+  title: Cell Ranger multi
+
+  chapters:
+      - index.qmd
+      # - cell-ranger/multi/mkref/index.qmd
+      # - cell-ranger/multi/create-probe-set/index.qmd
+      - cell-ranger/multi/write-library-configuration-files/index.qmd
+      # - cell-ranger/multi/count/index.qmd
+
+  appendices:
+    - references/index.qmd
+    - environments/index.qmd
+
+format:
+  html:
+    bibliography:
+      - _assets/bibliography/cell-ranger-multi.bib
+

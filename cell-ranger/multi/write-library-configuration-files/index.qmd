@@ -1,0 +1,152 @@
+---
+title: Create library configuration files
+
+description:
+  The Cell Ranger multi configuration file is used to detail analysis parameters, including the barcodes for multiplexed samples.
+
+abstract: |
+  Cell Ranger multi [@cellranger] requires an [input configuration file](https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/inputs/cr-multi-config-csv-opts) that describes all parameters required for the analysis, including FastQ paths, command line arguments and sample barcodes. The configuration file is created here using some information that can only be provided by the user. Each configuration file represents one Cell Ranger multi analysis.
+
+params:
+  genomics_root: /nemo/stp/babs/inputs/sequencing/data
+
+report:
+  inputs summary:
+    - Cell Ranger:
+      - Reference index
+      - Probe set
+    - FastQ files structured as provided by Genomics STP
+
+  outputs summary:
+    - Configuration files for use by Cell Ranger multi
+
+  attachments:
+    - inputs/reference/reference.json
+    - outputs/configs/
+---
+
+<!-- load any packages for the workbook -->
+```{r load-workbook-packages}
+#| cache: false
+#| echo: false
+#| include: false
+
+library(fs)
+library(knitr)
+library(magrittr)
+library(purrr)
+```
+
+<!-- use the environment template -->
+{{< include /_assets/includes/environment.qmd >}}
+
+<!-- collect the `babs` list from _quarto-babs.yaml -->
+{{< include /_assets/includes/babs.qmd >}}
+
+<!-- use the inputs/outputs template -->
+{{< include /_assets/includes/show_inputs_outputs.qmd >}}
+
+## Provide input data
+
+Input data[^1] required for this script:
+
+1. Cell Ranger [probe set CSV] file `inputs/probe-set.csv`.
+1. Cell ranger reference index, linked from the reference area or created using [cell ranger mkref], `inputs/reference`.
+1. `inputs/sample-sheets` should be a directory containing CSV files (eg `CBA0000A1.csv`) for each library, with a header and at least these _in the first two columns_ (additional sample information is optional):
+    * __sample_id__ is the scientist-provided, directory-safe, name of the sample.
+    * __probe_barcode_ids__ are the barcodes (eg `BC001`) used to identify each sample.
+1. (optional) A path (`inputs/fastq`) to FastQ files, arranged and named according to Genomics' `data` directory structure: `flow cell/fastq/*.fastq.gz`. For public data, the same structure can be replicated using placeholder names. For Crick projects, the path to `data` can be guessed (and not user-provided) using the `_quarto-babs.yaml` file's values.
+
+::: {.callout-tip}
+Currently, one sample sheet is required per library, for example `CBA0000A1.csv` and `CBA0000A2.csv`.
+:::
+
+[^1]: Input data is provided by the user, and (generally) can't be reasonably guessed (or provided) by this report.
+
+[probe set CSV]: https://www.10xgenomics.com/support/software/cell-ranger/downloads#probe-set-downloads
+[cell ranger mkref]: https://www.10xgenomics.com/support/software/cell-ranger/latest/tutorials/cr-tutorial-mr
+
+```{r check-for-inputs}
+#| code-summary: Check for report inputs
+#| echo: false
+#| results: asis
+
+## ---- inputs/fastq
+
+if(dir.exists('inputs/fastq')) {
+	file.symlink(from='../inputs/fastq', to='etc/fastq')
+} else {
+	if(is_link('etc/fastq'))
+		link_delete('etc/fastq')
+
+	dir.create(path='etc', showWarnings=FALSE)
+
+	babs |>
+		(`[`)(c('lab', 'scientist', 'limsid')) |>
+		append(params$genomics_root, after=0) |>
+		append('primary_data/') |>
+		unname() |>
+		do.call(what=file.path) |>
+		file.symlink(to='etc/fastq')
+
+	c('::: {.callout-warning}',
+	  'An `inputs/fastq` directory was not found, a link was created from Genomics\' `primary_data`.',
+	  ':::') |> cat(sep='\n')
+}
+
+## ---- inputs/probe-set.csv
+
+if(file.exists('inputs/probe-set.csv') |> not()) {
+	c('::: {.callout-important title="Execution stopped!"}',
+	  'A Cell Ranger probe set was not found at `inputs/probe-set.csv`. This should be an file or a symlink to a reference or custom probe set.',
+	  ':::') |> cat(sep='\n')
+	knit_exit()
+}
+
+## ---- inputs/reference
+
+if(file.exists('inputs/reference/reference.json') |> not()) {
+	c('::: {.callout-important title="Execution stopped!"}',
+	  'A Cell Ranger index (looking for a `reference.json`) was not found at `inputs/reference`. This should be an index or a symlink to an index.',
+	  ':::') |> cat(sep='\n')
+	knit_exit()
+}
+
+## ---- inputs/reference
+
+if(file.exists('inputs/sample-sheets') |> not()) {
+	c('::: {.callout-important title="Execution stopped!"}',
+	  'A directory of sample sheets was not found at `inputs/sample-sheets. This should be a directory of samples sheet CSV files or a symlink to one.',
+	  ':::') |> cat(sep='\n')
+	knit_exit()
+}
+```
+
+## Write library configuration files
+
+The [configuration file] required by Cell Ranger multi contains multiple CSV sections including analysis arguments, library FastQ paths and sample-specific arguments. One configuration file is required for each library and one library contains multiple barcoded samples.
+
+[configuration file]: https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/inputs/cr-multi-config-csv-opts
+
+```{r show-write-library-configuration-files-script}
+#| code-summary: Script to write Cell Ranger multi configuration files
+#| eval: false
+#| file: scripts/write-library-configuration-files.sh
+#| filename: scripts/write-library-configuration-files.R
+```
+
+```{bash run-write-library-configuration-files-script}
+#| code-summary: Run the `bash` to write library configuration files
+#| eval: true
+#| results: hide
+
+FASTQ=etc/fastq \
+OUTPUTS=outputs/configs \
+PROBE_SET=inputs/probe-set.csv \
+REFERENCE=inputs/reference \
+SAMPLE_SHEETS=inputs/sample-sheets \
+bash scripts/write-library-configuration-files.sh
+```
+
+<!-- use the attachments template -->
+{{< include /_assets/includes/attachments.qmd >}}

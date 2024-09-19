@@ -13,11 +13,11 @@
 ## ---- get-realpaths-of-symlinks
 
 if [[ -L $PROBE_SET ]]; then
-	PROBE_SET=`readlink $PROBE_SET`
+	PROBE_SET=`readlink --canonicalize-existing $PROBE_SET`
 fi
 
 if [[ -L $REFERENCE ]]; then
-	REFERENCE=`readlink $REFERENCE`
+	REFERENCE=`readlink --canonicalize-existing $REFERENCE`
 fi
 
 ## ---- print-parameters
@@ -39,7 +39,7 @@ for sample_sheet in $(find -L $SAMPLE_SHEETS -name '*.csv' | sort --version-sort
 
 	echo "sample_sheet=$sample_sheet ; library=$library"
 
-	cat > $OUTPUTS/$library.conf <<- CELL_RANGER_CONFIG
+	cat > $OUTPUTS/$library.csv <<- CELL_RANGER_CONFIG
 		[gene-expression]
 		chemistry,auto
 		probe-set,$PROBE_SET

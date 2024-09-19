@@ -1,7 +1,7 @@
 ---
 title: Get probe set
 
-description:
+description: |
   For customised probe sets, the probe set file must be created to relate probes and features. For standard panels, a 10x reference can be used.
 
 abstract: |

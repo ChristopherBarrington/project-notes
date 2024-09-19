@@ -1,7 +1,7 @@
 ---
 title: Create library configuration files
 
-description:
+description: |
   The Cell Ranger multi configuration file is used to detail analysis parameters, including the barcodes for multiplexed samples.
 
 abstract: |

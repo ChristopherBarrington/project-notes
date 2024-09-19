@@ -1,0 +1,197 @@
+---
+title: Get probe set
+
+description:
+  For customised probe sets, the probe set file must be created to relate probes and features. For standard panels, a 10x reference can be used.
+
+abstract: |
+  10x fixed kits uses probes to assay genes, rather than sequencing transcript fragments. The probes used in an experiment can be customised to include exogenous genes or genomes, for example a viral genome, in the samples. To count the expression from the exogenous transcriptome a custom probe set CSV is required. [10x-curated probe sets](https://www.10xgenomics.com/support/single-cell-gene-expression-flex/documentation/steps/probe-sets/chromium-frp-probe-set-files) are provided for the human and mouse panels.
+
+params:
+  custom:
+    value:
+      genome:
+        name: custom
+        version: newest
+      panel:
+        name: custom_probe_set
+
+  reference:
+    value:
+      genome: 
+        name: mm10
+        version: 2020-A
+      panel:
+        name: Chromium_Mouse_Transcriptome_Probe_Set
+        version: 1.0.1
+      area: /flask/reference/Genomics/10x/10x_transcriptomes/Chromium_Probe_Sets
+
+report:
+  inputs summary:
+    - (optional) Exogenous genome/transcripts configuration file
+
+  outputs summary:
+    - Probe set configuration file
+
+  attachments:
+    - etc/reference.csv
+    - inputs/custom.csv
+    - outputs/probe-set.csv
+---
+
+<!-- load any packages for the workbook -->
+```{r load-workbook-packages}
+#| cache: false
+#| echo: false
+#| include: false
+
+library(digest)
+library(fs)
+library(kableExtra)
+library(knitr)
+library(stringr)
+library(tibble)
+```
+
+<!-- use the environment template -->
+{{< include /_assets/includes/environment.qmd >}}
+
+<!-- use the inputs/outputs template -->
+{{< include /_assets/includes/show_inputs_outputs.qmd >}}
+
+## Provide input data
+
+Input data[^1] required for this script:
+
+1. `inputs/custom.csv` should be a probe set configuration file for the features to be added. The format should follow the [10x guidelines].
+1. (optional) `inputs/reference.csv` is the (likely) standard 10x-provided reference for the sample. If not provided, this is guessed using the `params` for the report.
+
+[^1]: Input data is provided by the user, and (generally) can't be reasonably guessed (or provided) by this report.
+
+[10x guidelines]: https://www.10xgenomics.com/support/single-cell-gene-expression-flex/documentation/steps/probe-sets/chromium-frp-probe-set-files
+
+```{r check-for-inputs}
+#| code-summary: Check for report inputs
+#| echo: false
+#| results: asis
+
+## ---- inputs/custom/*.csv
+
+from_file <- 'inputs/custom.csv'
+custom_probe_set_exists <- TRUE
+
+if(! file.exists(from_file)) {
+	custom_probe_set_exists <- FALSE
+	c('::: {.callout-note}',
+	  str_glue('`{from_file}` was not found, a custom probe set will not be created.'),
+	  ':::') |> cat(sep='\n')
+}
+
+## ---- inputs/reference.csv
+
+from_file <- 'inputs/reference.csv'
+to_file   <- 'etc/reference.csv'
+
+if(! file.exists(from_file)) {
+	if(is_link(to_file))
+		link_delete(to_file)
+
+	'^{params$reference$panel$name}_v{params$reference$panel$version}_{params$reference$genome$name}-{params$reference$genome$version}.csv$' |>
+		str_glue() |>
+		list.files(path=params$reference$area, full.names=TRUE) -> from_file
+
+	c('::: {.callout-warning}',
+	  str_glue('An input reference probe set was not found, checking for {params$reference$genome$name} {params$reference$genome$version} probe set version {params$reference$panel$version} in the reference area.'),
+	  ':::') |> cat(sep='\n')
+}
+
+to_file |> dirname() |> dir.create(recursive=TRUE, showWarnings=FALSE)
+file.symlink(from=from_file, to=to_file) |> invisible()
+```
+
+:::{`r if(custom_probe_set_exists) {'.content-visible'} else {'.content-hidden'}`}
+
+## Write custom probe set
+
+The reference and custom probe sets are now combined into `outputs/probe-set.csv`.
+
+Separate input files are merged and written into one file ready to be used by Cell Ranger. Header lines from the reference file are collected for the header of the output file.
+
+The header values must also be updated to reflect the merged probe set and new genome index.
+
+```{r show-input-probe-set-md5-table}
+#| code-summary: Calculate checksums for constituent probe sets
+#| eval: !expr custom_probe_set_exists
+#| results: asis
+
+c('etc/reference.csv', 'inputs/custom.csv') |>
+	sapply(digest, algo='md5') |>
+	enframe(name='Probe set file', value='md5') |>
+	kable(format='html',
+	      table.attr='class="table"',
+	      caption=str_glue('Checksums for input probe sets')) |>
+	column_spec(column=1, monospace=TRUE) |>
+	column_spec(column=2, monospace=TRUE)
+```
+
+```{r export-params-to-shell}
+#| code-summary: Export front-matter parameters to shell
+#| echo: false
+#| eval: !expr custom_probe_set_exists
+
+Sys.setenv(custom_panel_name=params$custom$panel$name,
+           custom_genome_name=params$custom$genome$name,
+           custom_genome_version=params$custom$genome$version)
+```
+
+```{bash show-get-probe-set-script}
+#| code-summary: Merge reference and custom input probe sets
+#| eval: false
+#| file: bin/get-probe-set.sh
+#| filename: bin/get-probe-set.sh
+```
+
+```{bash run-get-probe-set-script}
+#| code-summary: Run the `bash` script to merge probe sets
+#| eval: !expr custom_probe_set_exists
+#| results: hide
+
+CUSTOM_GENOME_NAME=$custom_genome_name \
+CUSTOM_GENOME_VERSION=$custom_genome_version \
+CUSTOM_PANEL_NAME=$custom_panel_name \
+CUSTOM_PROBE_SET=inputs/custom.csv \
+OUTPUT=outputs/probe-set.csv \
+REFERENCE_PROBE_SET=etc/reference.csv \
+bash bin/get-probe-set.sh
+```
+
+:::
+
+:::{`r if(custom_probe_set_exists) {'.content-hidden'} else {'.content-visible'}`}
+
+## Link to reference probe set
+
+Since no custom probe sets were provided, the reference probe set is provided at `outputs/probe-set.csv`.
+
+```{bash link-reference-probe-set-to-outputs}
+#| code-summary: Link reference probe set to outputs
+#| eval: !expr magrittr::not(custom_probe_set_exists)
+#| results: hide
+
+mkdir --parents outputs \
+&& rm --force outputs/* \
+&& cp --no-dereference etc/reference.csv outputs/probe-set.csv
+```
+
+::: {.callout-tip}
+The output probe set is a link to:
+
+``r system('readlink --canonicalize-existing outputs/probe-set.csv', intern=TRUE)``
+:::
+
+:::
+
+
+
+<!-- use the attachments template -->
+{{< include /_assets/includes/attachments.qmd >}}

@@ -35,6 +35,7 @@ library(fs)
 library(knitr)
 library(magrittr)
 library(purrr)
+library(stringr)
 ```
 
 <!-- use the environment template -->
@@ -50,11 +51,11 @@ library(purrr)
 
 Input data[^1] required for this script:
 
-1. Cell Ranger [probe set CSV] file `inputs/probe-set.csv`.
 1. Cell ranger reference index, linked from the reference area or created using [cell ranger mkref], `inputs/reference`.
 1. `inputs/sample-sheets` should be a directory containing CSV files (eg `CBA0000A1.csv`) for each library, with a header and at least these _in the first two columns_ (additional sample information is optional):
     * __sample_id__ is the scientist-provided, directory-safe, name of the sample.
     * __probe_barcode_ids__ are the barcodes (eg `BC001`) used to identify each sample.
+1. (optional) Cell Ranger [probe set CSV] file `inputs/probe-set.csv`. If missing, the output probe set created previously can be used, and can be linked automatically.
 1. (optional) A path (`inputs/fastq`) to FastQ files, arranged and named according to Genomics' `data` directory structure: `flow cell/fastq/*.fastq.gz`. For public data, the same structure can be replicated using placeholder names. For Crick projects, the path to `data` can be guessed (and not user-provided) using the `_quarto-babs.yaml` file's values.
 
 ::: {.callout-tip}
@@ -96,12 +97,22 @@ if(dir.exists('inputs/fastq')) {
 
 ## ---- inputs/probe-set.csv
 
-if(file.exists('inputs/probe-set.csv') |> not()) {
-	c('::: {.callout-important title="Execution stopped!"}',
-	  'A Cell Ranger probe set was not found at `inputs/probe-set.csv`. This should be an file or a symlink to a reference or custom probe set.',
+from_file <- 'inputs/probe-set.csv'
+to_file   <- 'etc/probe-set.csv'
+
+if(! file.exists(from_file)) {
+	if(is_link(to_file))
+		link_delete(to_file)
+
+	file.path('../..', 'get-probe-set', 'outputs/probe-set.csv') -> from_file
+
+	c('::: {.callout-warning}',
+	  str_glue('The probe set was not provided, so `{from_file}` was linked.'),
 	  ':::') |> cat(sep='\n')
-	knit_exit()
 }
+
+to_file |> dirname() |> dir.create(recursive=TRUE, showWarnings=FALSE)
+file.symlink(from=from_file, to=to_file) |> invisible()
 
 ## ---- inputs/reference
 
@@ -112,7 +123,7 @@ if(file.exists('inputs/reference/reference.json') |> not()) {
 	knit_exit()
 }
 
-## ---- inputs/reference
+## ---- inputs/sample-sheets
 
 if(file.exists('inputs/sample-sheets') |> not()) {
 	c('::: {.callout-important title="Execution stopped!"}',
@@ -131,21 +142,21 @@ The [configuration file] required by Cell Ranger multi contains multiple CSV sec
 ```{r show-write-library-configuration-files-script}
 #| code-summary: Script to write Cell Ranger multi configuration files
 #| eval: false
-#| file: scripts/write-library-configuration-files.sh
-#| filename: scripts/write-library-configuration-files.R
+#| file: bin/write-library-configuration-files.sh
+#| filename: bin/write-library-configuration-files.sh
 ```
 
 ```{bash run-write-library-configuration-files-script}
-#| code-summary: Run the `bash` to write library configuration files
+#| code-summary: Run the `bash` script to write library configuration files
 #| eval: true
 #| results: hide
 
 FASTQ=etc/fastq \
 OUTPUTS=outputs/configs \
-PROBE_SET=inputs/probe-set.csv \
+PROBE_SET=etc/probe-set.csv \
 REFERENCE=inputs/reference \
 SAMPLE_SHEETS=inputs/sample-sheets \
-bash scripts/write-library-configuration-files.sh
+bash bin/write-library-configuration-files.sh
 ```
 
 <!-- use the attachments template -->

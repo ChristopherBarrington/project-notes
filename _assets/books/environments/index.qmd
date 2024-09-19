@@ -23,7 +23,6 @@ abstract: |
 
 <!--
 quarto render environments/index.qmd \
---profile dev \
 --execute-param conda=false \
 --execute-param renv=false 
 -->
@@ -55,11 +54,11 @@ knitr::knit_engines$set(yaml=yaml_engine, json=json_engine)
 ```
 
 ```{r include-conda}
-#| child: conda.qmd
+#| child: children/conda.qmd
 #| eval: !expr params$conda
 ```
 
 ```{r include-renv}
-#| child: renv.qmd
+#| child: children/renv.qmd
 #| eval: !expr params$renv
 ```

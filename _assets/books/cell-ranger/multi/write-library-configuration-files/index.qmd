@@ -39,13 +39,13 @@ library(stringr)
 ```
 
 <!-- use the environment template -->
-{{< include /_assets/includes/environment.qmd >}}
+{{< include /_assets/quarto/children/environment.qmd >}}
 
 <!-- collect the `babs` list from _quarto-babs.yaml -->
-{{< include /_assets/includes/babs.qmd >}}
+{{< include /_assets/quarto/children/babs.qmd >}}
 
 <!-- use the inputs/outputs template -->
-{{< include /_assets/includes/show_inputs_outputs.qmd >}}
+{{< include /_assets/quarto/children/show_inputs_outputs.qmd >}}
 
 ## Provide input data
 
@@ -160,4 +160,4 @@ bash bin/write-library-configuration-files.sh
 ```
 
 <!-- use the attachments template -->
-{{< include /_assets/includes/attachments.qmd >}}
+{{< include /_assets/quarto/children/attachments.qmd >}}

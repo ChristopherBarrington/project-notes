@@ -3,6 +3,7 @@
 .Rprofile
 *.Rproj
 .Rproj.user
+renv
 renv/
 !_assets/renv
 

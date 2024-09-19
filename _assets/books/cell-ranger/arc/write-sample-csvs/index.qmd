@@ -111,8 +111,8 @@ The configuration file required by Cell Ranger ARC is a CSV with a path to the F
 ```{r show-write-sample-csvs-script}
 #| code-summary: Script to write Cell Ranger ARC configuration CSV files
 #| eval: false
-#| file: scripts/write-sample-csvs.R
-#| filename: scripts/write-sample-csvs.R
+#| file: bin/write-sample-csvs.R
+#| filename: bin/write-sample-csvs.R
 ```
 
 ```{bash run-write-sample-csvs-script}
@@ -123,7 +123,7 @@ The configuration file required by Cell Ranger ARC is a CSV with a path to the F
 fastq_path=etc/fastq \
 library_metadata=inputs/library-metadata.csv \
 outputs=outputs/sample-csvs \
-Rscript scripts/write-sample-csvs.R
+Rscript bin/write-sample-csvs.R
 ```
 
 <!-- use the attachments template -->

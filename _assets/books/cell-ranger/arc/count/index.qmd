@@ -107,14 +107,14 @@ The Slurm sbatch script expects environment variables providing paths to the:
 #| cache: false
 #| include: false
 
-read_chunk('scripts/submit.sbatch')
+read_chunk('bin/count.sbatch')
 ```
 
 ```{bash run-cell-ranger-arc-count}
 #| code-fold: false
 #| code-summary: Command to run Cell Ranger ARC count
 #| eval: false
-#| filename: Snippet of scripts/submit.sbatch
+#| filename: Snippet of bin/count.sbatch
 ```
 
 The complete script can be viewed in the following code chunk.
@@ -122,8 +122,8 @@ The complete script can be viewed in the following code chunk.
 ```{bash show-count-script}
 #| code-summary: Slurm sbatch script to run Cell Ranger ARC count
 #| eval: false
-#| file: scripts/submit.sbatch
-#| filename: scripts/submit.sbatch
+#| file: bin/count.sbatch
+#| filename: bin/count.sbatch
 ```
 
 ### Distribute analysis
@@ -153,7 +153,7 @@ sbatch \
 --array 1-$n_samples \
 --output logs/%A_%a.out \
 --wait \
-scripts/submit.sbatch \
+bin/count.sbatch \
 `ls --directory etc/sample-csvs/*`
 
 tar \

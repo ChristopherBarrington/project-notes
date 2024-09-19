@@ -12,18 +12,18 @@ params:
 
 report:
   inputs summary:
-      - Reference genome index
-      - Cell Ranger ARC sample CSVs
+    - Reference genome index
+    - Cell Ranger ARC sample CSVs
 
   outputs summary:
-      - Quantified matrices
-      - Cell Ranger ARC summary reports
-      - All Cell Ranger ARC output
+    - Quantified matrices
+    - Cell Ranger ARC summary reports
+    - All Cell Ranger ARC output
 
   attachments:
-      - etc/sample-csvs
-      - outputs/reports
-      - outputs/reports.tar
+    - etc/sample-csvs
+    - outputs/reports
+    - outputs/reports.tar
 ---
 
 <!-- load any packages for the workbook -->

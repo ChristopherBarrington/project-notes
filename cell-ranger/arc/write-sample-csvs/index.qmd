@@ -13,8 +13,8 @@ params:
 
 report:
   inputs summary:
-      - Library metadata including sample name and assay
-      - FastQ files structured as provided by Genomics STP
+    - Library metadata including sample name and assay
+    - FastQ files structured as provided by Genomics STP
 
   outputs summary:
     - CSV configuration files for use by Cell Ranger ARC

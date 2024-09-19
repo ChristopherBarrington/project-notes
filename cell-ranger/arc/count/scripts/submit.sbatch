@@ -31,7 +31,7 @@ sample_name=`basename ${sample_configuration_csv%.csv}`
 ## ---- check-and-read-reference-index-symlink
 
 if [[ -L $REFERENCE ]]; then
-	REFERENCE=`readlink $REFERENCE`
+	REFERENCE=`readlink --canonicalize-existing $REFERENCE`
 fi
 
 ## ---- print-variables

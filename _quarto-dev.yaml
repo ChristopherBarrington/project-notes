@@ -1,7 +1,0 @@
-format:
-  html:    
-    code-tools:
-      source: true
-
-project:
-  output-dir: _rendered/dev/

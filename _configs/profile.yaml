@@ -1,6 +1,6 @@
 profile:
   group:     
-    - [basic, cell-ranger-arc, cell-ranger-multi, seurat-multiome]
+    - [basic, book]
     - [project]
     - [babs]
     - [dev, live]

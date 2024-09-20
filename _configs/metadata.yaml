@@ -1,9 +1,0 @@
-date: last-modified
-date-format: "Do MMMM, YYYY"
-
-filters:
-  - search-replace
-
-search-replace:
-  +nextflow: "[Nextflow](https://www.nextflow.io)"
-  +nfcore: "[nf-core](https://nf-co.re)"

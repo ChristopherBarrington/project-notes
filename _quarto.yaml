@@ -1,8 +1,0 @@
-metadata-files:
-  - _configs/book.yaml
-  - _configs/execute.yaml
-  - _configs/format.yaml
-  - _configs/metadata.yaml
-  - _configs/profile.yaml
-  - _configs/project.yaml
-  - _configs/website.yaml

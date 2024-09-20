@@ -1,0 +1,19 @@
+book:
+  title: Cell Ranger multi
+
+  chapters:
+      - index.qmd
+      - get-reference-index/index.qmd
+      - get-probe-set/index.qmd
+      - write-library-configuration-files/index.qmd
+      - count/index.qmd
+
+  appendices:
+    - references/index.qmd
+    - environments/index.qmd
+
+format:
+  html:
+    bibliography:
+      - _assets/bibliography.bib
+

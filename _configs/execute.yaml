@@ -1,4 +1,0 @@
-execute:
-  cache: true
-  freeze: true
-  keep-md: true

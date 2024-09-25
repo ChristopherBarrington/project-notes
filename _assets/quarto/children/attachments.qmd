@@ -18,7 +18,7 @@
 
 local({
 	destination <- 'share'
-	stage_type <- 'cp' # dont use mv
+	stage_type  <- 'ln' # ln or cp
 
 	rmarkdown::metadata |>
 		purrr::pluck('report', 'attachments', .default=list()) -> expected_attachments
@@ -47,13 +47,23 @@ local({
 
 		dir.create(path=destination, showWarnings=FALSE, recursive=TRUE)
 
-		stringr::str_glue('rm --recursive --force {destination}/{target} && mkdir --parents {destination}/{target} && rmdir $_') |> system()
+		if(stage_type == 'cp') {
+			stringr::str_glue('rm --recursive --force {destination}/{target} ',
+				          '&& mkdir --parents {destination}/{target} && rmdir $_',
+				          '&& cp --recursive --parents --dereference {target} {destination}') |> system()
+		} else if(stage_type == 'ln') {
+			hardlink_target_files <- function(target) {
+				destination_link <- file.path(destination, target)
+				destination_path <- dirname(destination_link)
 
-		switch(stage_type,
-		cp='cp --recursive --parents --dereference {target} {destination}',
-		mv='mv {target} {destination}/{target} && ln --symbolic --relative {destination}/{target} {target}') |>
-			stringr::str_glue() |>
-			system()
+				stringr::str_glue('mkdir --parents {destination_path} ',
+				                  '&& rm --force {destination_link} ',
+				                  '&& ln {target} {destination_link}') |> system()
+			}
+
+			list.files(path=target, full.names=TRUE, recursive=TRUE) |>
+				plyr::l_ply(hardlink_target_files)
+		}
 	}
 
 	plyr::l_ply(attachments, stage_target, destination=destination, stage_type=stage_type)

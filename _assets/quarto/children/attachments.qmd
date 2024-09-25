@@ -69,7 +69,7 @@ local({
 	plyr::l_ply(attachments, stage_target, destination=destination, stage_type=stage_type)
 
 	## ---- remove-leading-destination
-	# any shared outputs that were written to {destination} need the {desination} removed for the generalised link to work
+	# any shared outputs that were written to {destination} need the {destination} removed for the generalised link to work
 
 	attachments |>
 		stringr::str_remove(pattern=stringr::str_glue('^{destination}/')) -> attachments

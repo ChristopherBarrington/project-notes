@@ -104,7 +104,7 @@ if(! file.exists(from_file)) {
 	if(is_link(to_file))
 		link_delete(to_file)
 
-	file.path('../..', 'get-probe-set', 'outputs/probe-set.csv') -> from_file
+	file.path('../..', 'create-probe-set', 'outputs/probe-set.csv') -> from_file
 
 	c('::: {.callout-warning}',
 	  str_glue('The probe set was not provided, so `{from_file}` was linked.'),

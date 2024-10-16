@@ -1,5 +1,5 @@
 ---
-title: Get a Cell Ranger reference index
+title: Create a Cell Ranger reference index
 
 description: |
   A reference index is required against which a dataset can be quantified. If not already available, one can be created with Cell Ranger.

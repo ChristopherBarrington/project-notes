@@ -113,7 +113,7 @@ check_input <- function(from, to, default) {
 
 ## ---- inputs/configs
 
-file.path('../..', 'write-library-configuration-files', 'outputs/configs') |>
+file.path('../..', 'write-configuration-files', 'outputs/configs') |>
 	check_input(from='inputs/configs', to='etc/configs')
 ```
 

@@ -5,7 +5,7 @@ description: |
   The Cell Ranger ARC configuration file provides sample names, identifiers and paths for FastQ files to quantify.
 
 abstract: |
-  Cell Ranger ARC requires an input file that details directories in which FastQ files may be found, an identifier that recursively selects the FastQ files from the directories to analyse and an assay type (gene expression or chromatin accessibility). The information is collated here and written into CSV files for each sample. 
+  Cell Ranger ARC requires an input file that details directories in which FastQ files may be found, an identifier that recursively selects the FastQ files from the directories to analyse and an assay type ("Gene Expression" or "Chromatin Accessibility"). The information is collated here and written into CSV files for each sample. 
 
 params:
   genomics_root: /nemo/stp/babs/inputs/sequencing/data
@@ -88,7 +88,7 @@ local({
 	}})
 ```
 
-Cell Ranger ARC [@cellranger; @cellranger_atac] needs to distinguish between the assay types provided for each sample. The user-provided table `inputs/library-to-assay.csv` defines which libraries provide either GEX or ATAC assays for a sample.
+Cell Ranger ARC [@cellranger; @cellranger_atac] needs to distinguish between the assay types provided for each sample. The user-provided table `inputs/library-metadata.csv` defines which libraries provide either GEX or ATAC assays for a sample.
 
 ```{r show-library-metadata}
 #| code-summary: Show library metadata
@@ -120,10 +120,10 @@ The configuration file required by Cell Ranger ARC is a CSV with a path to the F
 #| eval: true
 #| results: hide
 
-fastq_path=etc/fastq \
-library_metadata=inputs/library-metadata.csv \
-outputs=outputs/sample-csvs \
-Rscript bin/write-sample-csvs.R
+Rscript bin/write-sample-csvs.R \
+--fastq-path etc/fastq \
+--library-metadata-csv inputs/library-metadata.csv \
+--outputs-path outputs/sample-csvs
 ```
 
 <!-- use the attachments template -->

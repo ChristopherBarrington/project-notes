@@ -3,8 +3,8 @@ book:
 
   chapters:
       - index.qmd
-      - cell-ranger/get-reference-index/index.qmd
-      - cell-ranger/multi/get-probe-set/index.qmd
+      - cell-ranger/mkref/index.qmd
+      - cell-ranger/multi/write-probe-set/index.qmd
       - cell-ranger/multi/write-library-configuration-files/index.qmd
       - cell-ranger/multi/count/index.qmd
 
